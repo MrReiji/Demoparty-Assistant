@@ -8,4 +8,6 @@ class AppRouterPaths {
   static const components = '/components';
   static const register = '/register';
   static const account = '/account';
+  static const satellites = '/satellites';
+  static const sponsors = '/sponsors';
 }

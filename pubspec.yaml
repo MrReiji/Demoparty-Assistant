@@ -72,6 +72,12 @@ flutter:
     - assets/imgs/demoparty.jpg
     - assets/imgs/demoparty2.jpg
     - assets/imgs/demoparty3.jpg
+    - assets/imgs/revision_satellite.png
+    - assets/imgs/satellite.jpg
+    - assets/imgs/ventuz.jpg
+    - assets/imgs/zeitraum.png
+    - assets/imgs/bondix.png
+    - assets/imgs/supporters.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

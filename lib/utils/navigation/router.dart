@@ -1,3 +1,5 @@
+import 'package:demoparty_assistant/screens/satellites.dart';
+import 'package:demoparty_assistant/screens/sponsors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:demoparty_assistant/screens/onboarding.dart';
@@ -52,7 +54,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        name: 'articles',
+        name: 'news',
         path: AppRouterPaths.news,
         builder: (BuildContext context, GoRouterState state) {
           return News();
@@ -70,6 +72,20 @@ class AppRouter {
         path: AppRouterPaths.register,
         builder: (BuildContext context, GoRouterState state) {
           return Register();
+        },
+      ),
+      GoRoute(
+        name: 'satellites',
+        path: AppRouterPaths.satellites,
+        builder: (BuildContext context, GoRouterState state) {
+          return SatellitesScreen();
+        },
+      ),
+      GoRoute(
+        name: 'sponsors',
+        path: AppRouterPaths.sponsors,
+        builder: (BuildContext context, GoRouterState state) {
+          return SponsorsScreen();
         },
       ),
     ],

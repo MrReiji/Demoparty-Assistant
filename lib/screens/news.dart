@@ -1,3 +1,4 @@
+import 'package:demoparty_assistant/screens/news_detail.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -130,62 +131,4 @@ class News extends StatelessWidget {
   }
 }
 
-class NewsDetailScreen extends StatelessWidget {
-  final String title;
-  final String fullContent;
-  final String image;
 
-  NewsDetailScreen({
-    required this.title,
-    required this.fullContent,
-    required this.image, // Added image parameter
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Color(0xFF1F1F1F),
-      ),
-      backgroundColor: Color(0xFF191919),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
-                  image, // Using dynamic image
-                  width: double.infinity,
-                  height: 250,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                title,
-                style: GoogleFonts.oswald(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                fullContent,
-                style: TextStyle(
-                  fontSize: 18,
-                  height: 1.5,
-                  color: Colors.grey[300], // Zmieniono na jaśniejszy kolor
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

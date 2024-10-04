@@ -5,10 +5,37 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer-tile.dart';
 
-class NowDrawer extends StatelessWidget {
+class NowDrawer extends StatefulWidget {
   final String currentPage;
 
   NowDrawer({required this.currentPage});
+
+  @override
+  _NowDrawerState createState() => _NowDrawerState();
+}
+
+class _NowDrawerState extends State<NowDrawer> {
+  bool isAboutExpanded = false;
+
+  // Function to create consistent DrawerTile with standardized horizontal padding
+  Widget buildDrawerTile({
+    required IconData icon,
+    required String title,
+    required bool isSelected,
+    required Color iconColor,
+    GestureTapCallback? onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8), // Only horizontal padding
+      child: DrawerTile(
+        icon: icon,
+        title: title,
+        isSelected: isSelected,
+        iconColor: iconColor,
+        onTap: onTap,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +44,7 @@ class NowDrawer extends StatelessWidget {
         color: const Color(0XFF141414),
         child: Column(
           children: [
+            // Drawer header with logo and close button
             Container(
               height: MediaQuery.of(context).size.height * 0.12,
               width: MediaQuery.of(context).size.width * 0.85,
@@ -24,8 +52,7 @@ class NowDrawer extends StatelessWidget {
                 bottom: false,
                 top: false,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.only(left: 15.0, right: 15.0, top: 55),
+                  padding: const EdgeInsets.only(left: 15.0, right: 15.0, top: 55),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -53,144 +80,176 @@ class NowDrawer extends StatelessWidget {
                 ),
               ),
             ),
+            // Odstęp między logo a listą (Events)
+            const SizedBox(height: 15),
+            // Main drawer content with padding above and below the ListView
             Expanded(
-              flex: 2,
               child: ListView(
-                padding: const EdgeInsets.only(top: 36, left: 8, right: 16),
+                padding: EdgeInsets.zero,
                 children: [
-                  DrawerTile(
+                  buildDrawerTile(
                     icon: FontAwesomeIcons.calendar,
-                    onTap: () {
-                      if (currentPage != "Home")
-                        context.go(AppRouterPaths.home);
-                    },
-                    iconColor: NowUIColors.primary,
                     title: "Events",
-                    isSelected: currentPage == "Home",
-                  ),
-                  DrawerTile(
-                    icon: FontAwesomeIcons.arrowDownShortWide,
-                    onTap: () {
-                      if (currentPage != "Components")
-                        context.go(AppRouterPaths.components);
-                    },
-                    iconColor: NowUIColors.error,
-                    title: "During The Party",
-                    isSelected: currentPage == "Components",
-                  ),
-                  DrawerTile(
-                    icon: FontAwesomeIcons.newspaper,
-                    onTap: () {
-                      if (currentPage != "News")
-                        context.go(AppRouterPaths.news);
-                    },
+                    isSelected: widget.currentPage == "Home",
                     iconColor: NowUIColors.primary,
+                    onTap: () {
+                      if (widget.currentPage != "Home") context.go(AppRouterPaths.home);
+                    },
+                  ),
+                  buildDrawerTile(
+                    icon: FontAwesomeIcons.arrowDownShortWide,
+                    title: "During The Party",
+                    isSelected: widget.currentPage == "Components",
+                    iconColor: NowUIColors.error,
+                    onTap: () {
+                      if (widget.currentPage != "Components") context.go(AppRouterPaths.components);
+                    },
+                  ),
+                  buildDrawerTile(
+                    icon: FontAwesomeIcons.newspaper,
                     title: "News",
-                    isSelected: currentPage == "News",
-                  ),
-                  DrawerTile(
-                    icon: FontAwesomeIcons.circleInfo,
+                    isSelected: widget.currentPage == "News",
+                    iconColor: NowUIColors.primary,
                     onTap: () {
-                      if (currentPage != "Account")
-                        context.go(AppRouterPaths.account);
+                      if (widget.currentPage != "News") context.go(AppRouterPaths.news);
                     },
-                    iconColor: NowUIColors.info,
-                    title: "About",
-                    isSelected: currentPage == "Account",
                   ),
-                  DrawerTile(
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isAboutExpanded = !isAboutExpanded;
+                      });
+                    },
+                    child: buildDrawerTile(
+                      icon: FontAwesomeIcons.circleInfo,
+                      title: "About",
+                      isSelected: false,
+                      iconColor: NowUIColors.info,
+                    ),
+                  ),
+                  if (isAboutExpanded) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 36.0),
+                      child: buildDrawerTile(
+                        icon: FontAwesomeIcons.eye,
+                        title: "At a Glance",
+                        isSelected: widget.currentPage == "Pro",
+                        iconColor: NowUIColors.white.withOpacity(0.6),
+                        onTap: () {
+                          context.go(AppRouterPaths.pro);
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 36.0),
+                      child: buildDrawerTile(
+                        icon: FontAwesomeIcons.questionCircle,
+                        title: "First Time Visitor?",
+                        isSelected: false,
+                        iconColor: NowUIColors.white.withOpacity(0.6),
+                        onTap: () {},
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 36.0),
+                      child: buildDrawerTile(
+                        icon: FontAwesomeIcons.virus,
+                        title: "Covid-19 Information",
+                        isSelected: false,
+                        iconColor: NowUIColors.white.withOpacity(0.6),
+                        onTap: () {},
+                      ),
+                    ),
+                  ],
+                  buildDrawerTile(
                     icon: FontAwesomeIcons.trophy,
-                    onTap: () {
-                      if (currentPage != "Account")
-                        context.go(AppRouterPaths.account);
-                    },
-                    iconColor: NowUIColors.info,
                     title: "Competitions",
-                    isSelected: currentPage == "Account",
+                    isSelected: widget.currentPage == "Register",
+                    iconColor: NowUIColors.info,
+                    onTap: () {
+                      if (widget.currentPage != "Register") context.go(AppRouterPaths.register);
+                    },
                   ),
-                  DrawerTile(
+                  buildDrawerTile(
                     icon: FontAwesomeIcons.satellite,
-                    onTap: () {
-                      if (currentPage != "Account")
-                        context.go(AppRouterPaths.account);
-                    },
-                    iconColor: NowUIColors.info,
                     title: "Satellites",
-                    isSelected: currentPage == "Account",
-                  ),
-                  DrawerTile(
-                    icon: FontAwesomeIcons.heart,
+                    isSelected: widget.currentPage == "Satellites",
+                    iconColor: NowUIColors.primary,
                     onTap: () {
-                      if (currentPage != "Account")
-                        context.go(AppRouterPaths.account);
+                      if (widget.currentPage != "Satellites") context.go(AppRouterPaths.satellites);
                     },
-                    iconColor: NowUIColors.info,
+                  ),
+                  buildDrawerTile(
+                    icon: FontAwesomeIcons.heart,
                     title: "Sponsors",
-                    isSelected: currentPage == "Account",
+                    isSelected: widget.currentPage == "Sponsors",
+                    iconColor: NowUIColors.info,
+                    onTap: () {
+                      if (widget.currentPage != "Sponsors") context.go(AppRouterPaths.sponsors);
+                    },
                   ),
                 ],
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: Container(
-                padding: const EdgeInsets.only(left: 8, right: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Divider(
-                      height: 4,
-                      thickness: 0,
-                      color: NowUIColors.white.withOpacity(0.8),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8, left: 16, bottom: 4),
-                      child: Text(
-                        "IMPORTANT",
-                        style: TextStyle(
-                          color: NowUIColors.white,
-                          fontSize: 13,
-                        ),
+            // Divider with reduced width
+            Container(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 15),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: NowUIColors.white.withOpacity(0.8),
+              ),
+            ),
+            // Bottom section with Profile, Settings, Discord
+            Padding(
+              padding: const EdgeInsets.only(left: 0, right: 0, top: 10, bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 0, left: 16, bottom: 4),
+                    child: Text(
+                      "IMPORTANT",
+                      style: TextStyle(
+                        color: NowUIColors.white,
+                        fontSize: 13,
                       ),
                     ),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.only(top: 0),
-                        children: [
-                          DrawerTile(
-                            icon: FontAwesomeIcons.user,
-                            onTap: () {
-                              if (currentPage != "Profile")
-                                context.go(AppRouterPaths.profile);
-                            },
-                            iconColor: NowUIColors.warning,
-                            title: "Profile",
-                            isSelected: currentPage == "Profile",
-                          ),
-                          DrawerTile(
-                            icon: FontAwesomeIcons.cog,
-                            onTap: () {
-                              if (currentPage != "Settings")
-                                context.go(AppRouterPaths.settings);
-                            },
-                            iconColor: NowUIColors.success,
-                            title: "Settings",
-                            isSelected: currentPage == "Settings",
-                          ),
-                          DrawerTile(
-                            icon: FontAwesomeIcons.discord,
-                            onTap: () {
-                              // Dummy tile
-                            },
-                            iconColor: NowUIColors.success,
-                            title: "Discord",
-                            isSelected: false,
-                          ),
-                        ],
+                  ),
+                  // Lower drawer items
+                  ListView(
+                    padding: const EdgeInsets.only(top: 0),
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      buildDrawerTile(
+                        icon: FontAwesomeIcons.user,
+                        title: "Profile",
+                        isSelected: widget.currentPage == "Profile",
+                        iconColor: NowUIColors.warning,
+                        onTap: () {
+                          if (widget.currentPage != "Profile") context.go(AppRouterPaths.profile);
+                        },
                       ),
-                    ),
-                  ],
-                ),
+                      buildDrawerTile(
+                        icon: FontAwesomeIcons.cog,
+                        title: "Settings",
+                        isSelected: widget.currentPage == "Settings",
+                        iconColor: NowUIColors.success,
+                        onTap: () {
+                          if (widget.currentPage != "Settings") context.go(AppRouterPaths.settings);
+                        },
+                      ),
+                      buildDrawerTile(
+                        icon: FontAwesomeIcons.discord,
+                        title: "Discord",
+                        isSelected: false,
+                        iconColor: NowUIColors.success,
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
