@@ -33,7 +33,7 @@ class SatellitesScreen extends StatelessWidget {
         backgroundColor: Color(0xFF1F1F1F),
       ),
       
-      drawer: NowDrawer(currentPage: "Satellites"),
+      drawer: AppDrawer(currentPage: "Satellites"),
       backgroundColor: Color(0xFF191919),
       body: ListView.builder(
         itemCount: satellites.length,

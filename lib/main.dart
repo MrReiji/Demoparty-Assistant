@@ -1,3 +1,4 @@
+import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/utils/navigation/router.dart';
 
@@ -15,9 +16,9 @@ class MyApp extends StatelessWidget {
       routeInformationParser: AppRouter.router.routeInformationParser,
       routeInformationProvider: AppRouter.router.routeInformationProvider,
       title: 'Demoparty Assistant',
-      theme: ThemeData(fontFamily: 'Montserrat'),
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeData.dark(),
+      theme: lightThemeData(context), // Light theme
+      darkTheme: darkThemeData(context), // Dark theme
+      themeMode: ThemeMode.system, // Follow system theme
       debugShowCheckedModeBanner: false,
     );
   }

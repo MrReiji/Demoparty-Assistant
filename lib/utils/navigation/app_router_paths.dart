@@ -1,5 +1,5 @@
 class AppRouterPaths {
-  static const home = '/home';
+  static const timeTable = '/timeTable';
   static const settings = '/settings';
   static const onboarding = '/onboarding';
   static const pro = '/pro';
@@ -10,4 +10,5 @@ class AppRouterPaths {
   static const account = '/account';
   static const satellites = '/satellites';
   static const sponsors = '/sponsors';
+  static const seminars = '/seminars';
 }

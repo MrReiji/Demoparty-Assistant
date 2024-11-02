@@ -1,131 +1,135 @@
 import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
+import 'package:demoparty_assistant/constants/app_styles.dart'; // Import constants
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Onboarding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background image covering the entire screen
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/imgs/onboarding-free.png"),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          // Main content within a safe area
-          SafeArea(
-            child: Container(
-              padding: EdgeInsets.only(
-                left: 16.0,
-                right: 16.0,
-                top: MediaQuery.of(context).size.height * 0.15,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // Logo and app name section
-                  Column(
-                    children: [
-                      Image.asset("assets/imgs/now-logo.png", scale: 3),
-                      SizedBox(height: 20),
-                      Column(
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width / 2.5,
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Text(
-                                "Demoparty",
-                                style: TextStyle(
-                                  color: NowUIColors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width / 3,
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Text(
-                                "Assistant",
-                                style: TextStyle(
-                                  color: NowUIColors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: appGradientBackground,
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Main image with circular shape and shadow
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadowColor.withOpacity(0.5),
+                        blurRadius: shadowBlurRadius,
+                        offset: shadowOffset,
                       ),
                     ],
                   ),
-                  // Event details section
-                  Column(
-                    children: [
-                      Text(
-                        "Łódź, Poland",
-                        style: TextStyle(
-                          color: NowUIColors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
-                          fontSize: 20,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(
-                        "29.08.2024 - 01.09.2024",
-                        style: TextStyle(
-                          color: NowUIColors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
-                          fontSize: 15,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                  child: ClipOval(
+                    child: Image.asset(
+                      "assets/imgs/xenium_theme_image.png",
+                      fit: BoxFit.fill,
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.width * mainImageSizeFactor,
+                    ),
                   ),
-                  // 'Get Started' button
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: NowUIColors.white, // Text color
-                          backgroundColor: NowUIColors.info, // Button color
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4.0), // Corners
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 16.0,
-                          ),
-                        ),
-                        onPressed: () {
-                          context.go(AppRouterPaths.home);
-                        },
-                        child: Text(
-                          "GET STARTED",
-                          style: TextStyle(fontSize: 15.0).copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                ),
+                SizedBox(height: verticalSpacing),
+
+                // Title text
+                Text(
+                  "Xenium 2024\nDemoscene Party",
+                  style: GoogleFonts.tourney(
+                    color: colorScheme.onBackground,
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                    height: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: verticalSpacing),
+
+                // Theme description text
+                Text(
+                  "This Year's Theme: Folk",
+                  style: GoogleFonts.anta(
+                    color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
+                    fontSize: themeFontSize,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: verticalSpacing),
+
+                // Event details (location and date)
+                Column(
+                  children: [
+                    Text(
+                      "Łódź, Poland",
+                      style: GoogleFonts.anta(
+                        color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
+                        fontSize: locationFontSize,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      "29.08.2024 - 01.09.2024",
+                      style: GoogleFonts.anta(
+                        color: theme.textTheme.bodyLarge?.color?.withOpacity(0.6),
+                        fontSize: dateFontSize,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+                SizedBox(height: verticalSpacing),
+
+                // "GET STARTED" button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: colorScheme.onPrimary,
+                      backgroundColor: colorScheme.primary,
+                      padding: EdgeInsets.symmetric(vertical: buttonPadding),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(borderRadiusValue),
+                      ),
+                      elevation: 10,
+                      shadowColor: shadowColor,
+                    ),
+                    onPressed: () {
+                      context.go(AppRouterPaths.timeTable);
+                    },
+                    child: Text(
+                      "GET STARTED",
+                      style: GoogleFonts.anta(
+                        fontSize: buttonFontSize,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: theme.textTheme.bodyLarge?.color,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

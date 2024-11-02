@@ -47,7 +47,7 @@ class SponsorsScreen extends StatelessWidget {
         backgroundColor: Color(0xFF1F1F1F),
       ),
       
-      drawer: NowDrawer(currentPage: "Sponsors"),
+      drawer: AppDrawer(currentPage: "Sponsors"),
       backgroundColor: Color(0xFF191919),
       body: ListView.builder(
         itemCount: sponsors.length,

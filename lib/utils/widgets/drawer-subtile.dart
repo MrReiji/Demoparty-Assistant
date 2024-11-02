@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/constants/app_styles.dart';
 
-class DrawerTile extends StatelessWidget {
+class SubDrawerTile extends StatelessWidget {
   final String title;
   final IconData icon;
   final GestureTapCallback? onTap;
   final bool isSelected;
   final Color iconColor;
 
-  DrawerTile({
+  SubDrawerTile({
     required this.title,
     required this.icon,
     required this.onTap,
@@ -21,37 +21,31 @@ class DrawerTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: isSelected
-              ? primaryColor.withOpacity(0.3) // Zmieniono na primaryColor
-              : backgroundColorEnd.withOpacity(0.15), // Zmieniono na backgroundColorEnd
+              ? primaryColor.withOpacity(0.2) // Zmieniono na primaryColor
+              : backgroundColorEnd.withOpacity(0.1), // Zmieniono na backgroundColorEnd
           borderRadius: BorderRadius.circular(borderRadiusValue),
-          border: Border.all(
-            color: isSelected
-                ? primaryColor // Zmieniono na primaryColor
-                : textColorLight.withOpacity(0.1), // Zmieniono na textColorLight
-          ),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              size: 20,
-              color: isSelected ? textColorLight : iconColor.withOpacity(0.8), // Zmieniono na textColorLight
+              size: 18,
+              color: isSelected ? textColorLight : iconColor.withOpacity(0.6), // Zmieniono na textColorLight
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  letterSpacing: 0.2,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w300,
                   color: isSelected
                       ? textColorLight // Zmieniono na textColorLight
-                      : textColorLight.withOpacity(0.8), // Zmieniono na textColorLight
+                      : textColorLight.withOpacity(0.7), // Zmieniono na textColorLight
                 ),
               ),
             ),

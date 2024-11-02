@@ -35,6 +35,7 @@ dependencies:
   go_router: ^14.2.3
   google_fonts: ^6.2.1
   stroke_text: ^0.0.3
+  beautiful_soup_dart: ^0.3.0
 
 dev_dependencies:
   flutter_test:
@@ -53,31 +54,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/imgs/onboarding-bg.png
-    - assets/imgs/android.png
-    - assets/imgs/ios.png
-    - assets/imgs/creative-tim.png
-    - assets/imgs/now-logo.png
-    - assets/imgs/register-bg.png
-    - assets/imgs/bg-profile.png
-    - assets/imgs/profile-img.jpg
-    - assets/imgs/album-1.jpg
-    - assets/imgs/album-2.jpg
-    - assets/imgs/album-3.jpg
-    - assets/imgs/album-4.jpg
-    - assets/imgs/album-5.jpg
-    - assets/imgs/album-6.jpg
-    - assets/imgs/onboarding-free.png
-    - assets/imgs/invision-white-slim.png
-    - assets/imgs/demoparty.jpg
-    - assets/imgs/demoparty2.jpg
-    - assets/imgs/demoparty3.jpg
-    - assets/imgs/revision_satellite.png
-    - assets/imgs/satellite.jpg
-    - assets/imgs/ventuz.jpg
-    - assets/imgs/zeitraum.png
-    - assets/imgs/bondix.png
-    - assets/imgs/supporters.png
+    - assets/imgs/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -39,7 +39,7 @@ class News extends StatelessWidget {
         title: Text("Demoparty News"),
         backgroundColor: Color(0xFF1F1F1F),
       ),
-      drawer: NowDrawer(currentPage: "News"),
+      drawer: AppDrawer(currentPage: "News"),
       backgroundColor: Color(0xFF191919),
       body: ListView.builder(
         itemCount: news.length,

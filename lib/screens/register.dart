@@ -1,215 +1,196 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:flutter/material.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:demoparty_assistant/constants/AppColors.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import 'package:demoparty_assistant/utils/widgets/drawer.dart';
 
-import 'package:demoparty_assistant/constants/Theme.dart';
+// class Register extends StatefulWidget {
+//   @override
+//   _RegisterState createState() => _RegisterState();
+// }
 
-//widgets
-import 'package:demoparty_assistant/utils/widgets/navbar.dart';
-import 'package:demoparty_assistant/utils/widgets/input.dart';
+// class _RegisterState extends State<Register> {
+//   bool _checkboxValue = false;
+//   bool _isPasswordVisible = false;
+//   bool _isConfirmPasswordVisible = false;
+//   String _selectedCountry = "Germany"; // Default value for country selection
 
-import 'package:demoparty_assistant/utils/widgets/drawer.dart';
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text("Login / Registration", style: GoogleFonts.oswald()),
+//         backgroundColor: Color(0xFF1F1F1F),
+//       ),
+//       drawer: AppDrawer(currentPage: "Register"),
+//       backgroundColor: Color(0xFF191919),
+//       body: SafeArea(
+//         child: ListView(
+//           padding: const EdgeInsets.all(16.0),
+//           children: [
+//             // Login Section
+//             Text(
+//               "Login",
+//               style: GoogleFonts.oswald(fontSize: 20, fontWeight: FontWeight.bold),
+//             ),
+//             SizedBox(height: 10),
+//             _buildInputField("Handle", Icons.person),
+//             _buildPasswordField("Password", _isPasswordVisible, (bool visible) {
+//               setState(() {
+//                 _isPasswordVisible = visible;
+//               });
+//             }),
+//             SizedBox(height: 20),
+//             ElevatedButton(
+//               onPressed: () {
+//                 // Login action
+//               },
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: AppColors.primary,
+//                 padding: EdgeInsets.symmetric(vertical: 16.0),
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8.0),
+//                 ),
+//               ),
+//               child: Text("LOG IN", style: TextStyle(fontSize: 16)),
+//             ),
+//             SizedBox(height: 30),
+//             Center(
+//               child: Text(
+//                 "Not registered yet? Look below!",
+//                 style: GoogleFonts.roboto(color: Colors.grey[400]),
+//               ),
+//             ),
+//             SizedBox(height: 30),
 
-class Register extends StatefulWidget {
-  @override
-  _RegisterState createState() => _RegisterState();
-}
+//             // Register Section
+//             Text(
+//               "Register",
+//               style: GoogleFonts.oswald(fontSize: 20, fontWeight: FontWeight.bold),
+//             ),
+//             SizedBox(height: 10),
+//             _buildInputField("Handle", Icons.person),
+//             _buildInputField("Group", Icons.group),
+//             _buildDropdownField("Country", _selectedCountry, (String? newValue) {
+//               setState(() {
+//                 _selectedCountry = newValue!;
+//               });
+//             }),
+//             _buildInputField("Access Key", Icons.vpn_key),
+//             SizedBox(height: 10),
+//             ElevatedButton.icon(
+//               onPressed: () {
+//                 // Scan ticket action
+//               },
+//               icon: Icon(FontAwesomeIcons.qrcode, size: 16),
+//               label: Text("SCAN TICKET"),
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: AppColors.secondary,
+//                 padding: EdgeInsets.symmetric(vertical: 16.0),
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8.0),
+//                 ),
+//               ),
+//             ),
+//             SizedBox(height: 20),
+//             _buildPasswordField("Password", _isPasswordVisible, (bool visible) {
+//               setState(() {
+//                 _isPasswordVisible = visible;
+//               });
+//             }),
+//             _buildPasswordField("Repeat", _isConfirmPasswordVisible, (bool visible) {
+//               setState(() {
+//                 _isConfirmPasswordVisible = visible;
+//               });
+//             }),
+//             SizedBox(height: 20),
+//             ElevatedButton(
+//               onPressed: () {
+//                 // Register action
+//               },
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: AppColors.primary,
+//                 padding: EdgeInsets.symmetric(vertical: 16.0),
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8.0),
+//                 ),
+//               ),
+//               child: Text("REGISTER", style: TextStyle(fontSize: 16)),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
 
-class _RegisterState extends State<Register> {
-  bool _checkboxValue = false;
+//   // Helper method to build input fields
+//   Widget _buildInputField(String label, IconData icon) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8.0),
+//       child: TextFormField(
+//         decoration: InputDecoration(
+//           labelText: label,
+//           prefixIcon: Icon(icon),
+//           border: OutlineInputBorder(),
+//           filled: true,
+//           fillColor: Colors.grey[850],
+//         ),
+//       ),
+//     );
+//   }
 
-  final double height = window.physicalSize.height;
+//   // Helper method to build password fields with visibility toggle
+//   Widget _buildPasswordField(String label, bool isVisible, Function(bool) toggleVisibility) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8.0),
+//       child: TextFormField(
+//         obscureText: !isVisible,
+//         decoration: InputDecoration(
+//           labelText: label,
+//           prefixIcon: Icon(Icons.lock),
+//           suffixIcon: IconButton(
+//             icon: Icon(
+//               isVisible ? Icons.visibility : Icons.visibility_off,
+//             ),
+//             onPressed: () {
+//               toggleVisibility(!isVisible);
+//             },
+//           ),
+//           border: OutlineInputBorder(),
+//           filled: true,
+//           fillColor: Colors.grey[850],
+//         ),
+//       ),
+//     );
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: Navbar(
-          transparent: true,
-          title: "",
-          reverseTextcolor: true,
-        ),
-        extendBodyBehindAppBar: true,
-        drawer: NowDrawer(currentPage: "Account"),
-        body: Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage("assets/imgs/register-bg.png"),
-                      fit: BoxFit.cover)),
-            ),
-            SafeArea(
-              child: ListView(children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 16, left: 16.0, right: 16.0, bottom: 32),
-                  child: Card(
-                      elevation: 5,
-                      clipBehavior: Clip.antiAlias,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                      child: Container(
-                          height: MediaQuery.of(context).size.height * 0.78,
-                          color: NowUIColors.bgColorScreen,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 24.0, bottom: 8),
-                                    child: Center(
-                                        child: Text("Register",
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w600))),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      RawMaterialButton(
-                                        onPressed: () {},
-                                        elevation: 4.0,
-                                        fillColor: NowUIColors.socialFacebook,
-                                        child: Icon(FontAwesomeIcons.facebook,
-                                            size: 16.0, color: Colors.white),
-                                        padding: EdgeInsets.all(15.0),
-                                        shape: CircleBorder(),
-                                      ),
-                                      RawMaterialButton(
-                                        onPressed: () {},
-                                        elevation: 4.0,
-                                        fillColor: NowUIColors.socialTwitter,
-                                        child: Icon(FontAwesomeIcons.twitter,
-                                            size: 16.0, color: Colors.white),
-                                        padding: EdgeInsets.all(15.0),
-                                        shape: CircleBorder(),
-                                      ),
-                                      RawMaterialButton(
-                                        onPressed: () {},
-                                        elevation: 4.0,
-                                        fillColor: NowUIColors.socialDribbble,
-                                        child: Icon(FontAwesomeIcons.dribbble,
-                                            size: 16.0, color: Colors.white),
-                                        padding: EdgeInsets.all(15.0),
-                                        shape: CircleBorder(),
-                                      )
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 24.0, bottom: 24.0),
-                                    child: Center(
-                                      child: Text("or be classical",
-                                          style: TextStyle(
-                                              color: NowUIColors.time,
-                                              fontWeight: FontWeight.w200,
-                                              fontSize: 16)),
-                                    ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Input(
-                                          placeholder: "First Name...",
-                                          prefixIcon:
-                                              Icon(Icons.school, size: 20),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Input(
-                                            placeholder: "Last Name...",
-                                            prefixIcon:
-                                                Icon(Icons.email, size: 20)),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 8.0,
-                                            left: 8.0,
-                                            right: 8.0,
-                                            bottom: 0),
-                                        child: Input(
-                                            placeholder: "Your Email...",
-                                            prefixIcon:
-                                                Icon(Icons.lock, size: 20)),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 8.0, top: 0, bottom: 16),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Checkbox(
-                                              activeColor: NowUIColors
-                                                  .primary, // Color when the checkbox is checked
-                                              value:
-                                                  _checkboxValue, // Current value of the checkbox
-                                              onChanged: (bool? newValue) {
-                                                setState(() {
-                                                  _checkboxValue = newValue!;
-                                                });
-                                              },
-                                            ),
-                                            Text(
-                                                "I agree with the terms and conditions",
-                                                style: TextStyle(
-                                                    color: NowUIColors.black,
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.w200)),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Center(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        // Respond to button press
-                                        Navigator.pushReplacementNamed(
-                                            context, '/home');
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        foregroundColor:
-                                            NowUIColors.white, // Text color
-                                        backgroundColor: NowUIColors
-                                            .primary, // Button background color
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              32.0), // Rounded corners
-                                        ),
-                                        padding: EdgeInsets.only(
-                                            left: 32.0,
-                                            right: 32.0,
-                                            top: 12,
-                                            bottom: 12), // Button padding
-                                      ),
-                                      child: Text(
-                                        "Get Started",
-                                        style: TextStyle(fontSize: 14.0),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ))),
-                ),
-              ]),
-            )
-          ],
-        ));
-  }
-}
+//   // Helper method to build dropdown field for country selection
+//   Widget _buildDropdownField(String label, String value, Function(String?) onChanged) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8.0),
+//       child: InputDecorator(
+//         decoration: InputDecoration(
+//           labelText: label,
+//           border: OutlineInputBorder(),
+//           filled: true,
+//           fillColor: Colors.grey[850],
+//         ),
+//         child: DropdownButtonHideUnderline(
+//           child: DropdownButton<String>(
+//             value: value,
+//             isExpanded: true,
+//             icon: Icon(Icons.arrow_drop_down),
+//             items: <String>['Germany', 'USA', 'France', 'Japan', 'Other']
+//                 .map<DropdownMenuItem<String>>((String country) {
+//               return DropdownMenuItem<String>(
+//                 value: country,
+//                 child: Text(country),
+//               );
+//             }).toList(),
+//             onChanged: onChanged,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

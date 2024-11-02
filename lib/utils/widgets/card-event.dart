@@ -1,4 +1,3 @@
-import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
@@ -6,32 +5,26 @@ class EventCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String author;
-  final Color color; // Nowy parametr do ustawienia koloru
-  final String label; // Nowy parametr do ustawienia własnego tekstu
+  final Color color; // Ustawienie koloru z parametru
+  final String label; // Ustawienie własnego tekstu z parametru
 
   EventCard({
     required this.time,
     required this.icon,
     required this.title,
     required this.author,
-    this.color = NowUIColors.primary, // Domyślny kolor, jeśli nie podany
-    this.label = 'Event', // Domyślny tekst, jeśli nie podany
+    this.color = const Color(0xFF1B1B1B), // Domyślny kolor, jeśli brak theme
+    this.label = 'Event',
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[850]!.withOpacity(0.5),
+        color: theme.colorScheme.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: Offset(0, 1),
-          ),
-        ],
       ),
       padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
       child: Row(
@@ -42,20 +35,20 @@ class EventCard extends StatelessWidget {
             height: 45,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.0),
-              color: color, // Zmienny kolor z parametru
+              color: color, // Kolor z parametru lub domyślny
             ),
             child: Row(
               children: [
                 Icon(
                   icon,
-                  color: Colors.black87,
+                  color: theme.colorScheme.onPrimary,
                   size: 20.0,
                 ),
                 SizedBox(width: 6.0),
                 Text(
-                  label, // Zmienny tekst z parametru
+                  label, // Tekst etykiety
                   style: TextStyle(
-                    color: Colors.black87,
+                    color: theme.colorScheme.onPrimary,
                     fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
@@ -70,9 +63,8 @@ class EventCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -82,18 +74,16 @@ class EventCard extends StatelessWidget {
                   children: [
                     Text(
                       time,
-                      style: TextStyle(
-                        color: Colors.amberAccent,
-                        fontSize: 14.0,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.secondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     SizedBox(width: 10.0),
                     Text(
                       author,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14.0,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onBackground.withOpacity(0.7),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
