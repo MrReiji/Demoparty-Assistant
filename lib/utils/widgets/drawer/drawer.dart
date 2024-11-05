@@ -1,11 +1,8 @@
-import 'package:demoparty_assistant/utils/widgets/drawer-subtile.dart';
+import 'package:demoparty_assistant/constants/drawer_items.dart';
+import 'package:demoparty_assistant/utils/widgets/drawer/drawer-subtile.dart';
+import 'package:demoparty_assistant/utils/widgets/drawer/drawer-tile.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:demoparty_assistant/constants/app_styles.dart';
-import 'package:demoparty_assistant/utils/widgets/drawer-tile.dart';
-import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
-import 'package:demoparty_assistant/constants/drawer_items.dart';
 
 class AppDrawer extends StatefulWidget {
   final String currentPage;
@@ -92,6 +89,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -106,7 +104,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   children: [
                     Expanded(
                       child: Image.asset(
-                        "assets/imgs/now-logo.png",
+                        "assets/imgs/xenium_logo.png",
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -115,7 +113,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       child: IconButton(
                         icon: Icon(
                           Icons.menu,
-                          color: textColorLight.withOpacity(0.82),
+                          color: theme.iconTheme.color?.withOpacity(0.82),
                           size: 24.0,
                         ),
                         onPressed: () {
@@ -127,10 +125,10 @@ class _AppDrawerState extends State<AppDrawer> {
                 ),
               ),
             ),
-            const Divider(
+            Divider(
               height: 1,
               thickness: 1,
-              color: mutedTextColor,
+              color: theme.dividerColor,
             ),
             const SizedBox(height: 8),
             Expanded(

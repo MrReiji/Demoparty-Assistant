@@ -65,6 +65,14 @@ const buttonPadding = 18.0;
 const shadowBlurRadius = 15.0;
 const shadowOffset = Offset(0, 8);
 
+// Event Type Colors
+const eventColor = Color(0xFF4A90E2); // Soft blue for general events
+const seminarColor = Color(0xFF9C27B0); // Purple for seminars
+const concertColor = Color(0xFFE53935); // Red for concerts
+const deadlineColor = Color(0xFFFFA726); // Orange for deadlines
+const compoColor = Color(0xFF26A69A); // Teal for competitions
+
+
 // Other colors
 const neutralColor = Color.fromRGBO(255, 255, 255, 0.2);
 const infoColor = Color.fromRGBO(44, 168, 255, 1.0);

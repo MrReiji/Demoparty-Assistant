@@ -6,18 +6,24 @@ class SubDrawerTile extends StatelessWidget {
   final IconData icon;
   final GestureTapCallback? onTap;
   final bool isSelected;
-  final Color iconColor;
+  final Color? iconColor;
 
   SubDrawerTile({
     required this.title,
     required this.icon,
     required this.onTap,
     this.isSelected = false,
-    this.iconColor = textColorPrimary, // Zmieniono na textColorPrimary
+    this.iconColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+    final backgroundColor = theme.scaffoldBackgroundColor;
+    final iconThemeColor = theme.iconTheme.color;
+    final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -25,8 +31,8 @@ class SubDrawerTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: isSelected
-              ? primaryColor.withOpacity(0.2) // Zmieniono na primaryColor
-              : backgroundColorEnd.withOpacity(0.1), // Zmieniono na backgroundColorEnd
+              ? primaryColor.withOpacity(0.2)
+              : backgroundColor.withOpacity(0.5),
           borderRadius: BorderRadius.circular(borderRadiusValue),
         ),
         child: Row(
@@ -34,18 +40,18 @@ class SubDrawerTile extends StatelessWidget {
             Icon(
               icon,
               size: 18,
-              color: isSelected ? textColorLight : iconColor.withOpacity(0.6), // Zmieniono na textColorLight
+              color: isSelected
+                  ? iconThemeColor
+                  : (iconColor ?? iconThemeColor)?.withOpacity(0.6),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w300,
+                style: theme.textTheme.titleSmall?.copyWith(
                   color: isSelected
-                      ? textColorLight // Zmieniono na textColorLight
-                      : textColorLight.withOpacity(0.7), // Zmieniono na textColorLight
+                      ? textColor
+                      : textColor.withOpacity(0.7),
                 ),
               ),
             ),

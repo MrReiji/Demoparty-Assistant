@@ -36,6 +36,8 @@ dependencies:
   google_fonts: ^6.2.1
   stroke_text: ^0.0.3
   beautiful_soup_dart: ^0.3.0
+  webview_flutter: ^4.10.0
+  youtube_player_flutter: ^9.1.1
 
 dev_dependencies:
   flutter_test:

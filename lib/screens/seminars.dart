@@ -1,4 +1,4 @@
-import 'package:demoparty_assistant/utils/widgets/drawer.dart';
+import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stroke_text/stroke_text.dart';

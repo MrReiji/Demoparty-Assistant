@@ -4,7 +4,6 @@ class EventCard extends StatelessWidget {
   final String time;
   final IconData icon;
   final String title;
-  final String author;
   final Color color; // Ustawienie koloru z parametru
   final String label; // Ustawienie własnego tekstu z parametru
 
@@ -12,9 +11,8 @@ class EventCard extends StatelessWidget {
     required this.time,
     required this.icon,
     required this.title,
-    required this.author,
-    this.color = const Color(0xFF1B1B1B), // Domyślny kolor, jeśli brak theme
-    this.label = 'Event',
+    required this.color,
+    required this.label
   });
 
   @override
@@ -26,12 +24,13 @@ class EventCard extends StatelessWidget {
         color: theme.colorScheme.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(10.0),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Sekcja po lewej: ikona i etykieta
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 6.0),
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
             height: 45,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.0),
@@ -44,7 +43,7 @@ class EventCard extends StatelessWidget {
                   color: theme.colorScheme.onPrimary,
                   size: 20.0,
                 ),
-                SizedBox(width: 6.0),
+                const SizedBox(width: 6.0),
                 Text(
                   label, // Tekst etykiety
                   style: TextStyle(
@@ -56,35 +55,36 @@ class EventCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 20.0),
+          const SizedBox(width: 20.0),
+
+          // Sekcja po prawej: tytuł i czas
           Expanded(
-            child: Column(
+            child: Column(  
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Tytuł z możliwością zawijania do nowej linii
                 Text(
                   title,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
+                    fontSize: 18
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 4.0),
+                const SizedBox(height: 6.0),
                 Row(
                   children: [
+                    Icon(
+                      Icons.access_time,
+                      color: Colors.amberAccent,
+                      size: 16.0,
+                    ),
+                    const SizedBox(width: 4.0),
                     Text(
                       time,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.secondary,
+                        color: Colors.amberAccent,
                         fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(width: 10.0),
-                    Text(
-                      author,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onBackground.withOpacity(0.7),
-                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
