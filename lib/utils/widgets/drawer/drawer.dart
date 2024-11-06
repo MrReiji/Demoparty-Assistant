@@ -1,4 +1,5 @@
 import 'package:demoparty_assistant/constants/drawer_items.dart';
+import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer-subtile.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer-tile.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ class _AppDrawerState extends State<AppDrawer> {
     return drawerItems.map((item) {
       bool hasSubItems = item.containsKey('subItems');
       bool isExpanded = _expandedSection == item['title'];
-      bool isSelected = widget.currentPage.toLowerCase() == item['page'].toString().toLowerCase();
+      bool isSelected = widget.currentPage.toLowerCase() == item['page']?.toString().toLowerCase();
 
       if (!hasSubItems) {
         return Padding(
@@ -37,8 +38,14 @@ class _AppDrawerState extends State<AppDrawer> {
             isSelected: isSelected,
             iconColor: item['iconColor'],
             onTap: () {
-              if (widget.currentPage != item['page']) {
-                context.go(item['route']);
+              if (item['route'] != null) {
+                if (widget.currentPage != item['page']) {
+                  context.go(item['route']);
+                }
+              } else if (item['url'] != null) {
+                context.go('${AppRouterPaths.content}?url=${Uri.encodeComponent(item['url'])}&title=${Uri.encodeComponent(item['title'])}');
+              } else {
+                // Obsłuż przypadek, gdy nie ma ani route, ani url
               }
             },
           ),
@@ -75,8 +82,14 @@ class _AppDrawerState extends State<AppDrawer> {
                   isSelected: isSubItemSelected,
                   iconColor: subItem['iconColor'],
                   onTap: () {
-                    if (widget.currentPage != subItem['page']) {
-                      context.go(subItem['route']);
+                    if (subItem['route'] != null) {
+                      if (widget.currentPage != subItem['page']) {
+                        context.go(subItem['route']);
+                      }
+                    } else if (subItem['url'] != null) {
+                      context.go('${AppRouterPaths.content}?url=${Uri.encodeComponent(subItem['url'])}&title=${Uri.encodeComponent(subItem['title'])}');
+                    } else {
+                      // Obsłuż przypadek, gdy nie ma ani route, ani url
                     }
                   },
                 ),
@@ -117,7 +130,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           size: 24.0,
                         ),
                         onPressed: () {
-                          context.pop();
+                          Navigator.pop(context);
                         },
                       ),
                     ),

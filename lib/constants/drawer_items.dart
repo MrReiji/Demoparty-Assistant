@@ -1,5 +1,4 @@
 import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
-import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:demoparty_assistant/constants/app_styles.dart'; // Import global styles
 
@@ -8,35 +7,35 @@ final List<Map<String, dynamic>> drawerItems = [
     'icon': FontAwesomeIcons.infoCircle,
     'title': 'About the Party',
     'page': null,
-    'iconColor': primaryColor, // Use primary color from app styles
+    'iconColor': aboutPartyColor, // Bright Coral
     'subItems': [
       {
         'icon': FontAwesomeIcons.bullhorn,
         'title': 'Xenium Party',
-        'page': 'XeniumParty',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': primaryColor,
+        'page': 'Xenium Party',
+        'url': 'https://2024.xenium.rocks/about/xenium/',
+        'iconColor': aboutPartyColor,
       },
       {
         'icon': FontAwesomeIcons.users,
         'title': 'Organizers',
         'page': 'Organizers',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': primaryColor,
+        'url': 'https://2024.xenium.rocks/about/orgas/',
+        'iconColor': aboutPartyColor,
       },
       {
         'icon': FontAwesomeIcons.exclamationTriangle,
         'title': 'Important Changes',
-        'page': 'ImportantChanges',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': warningColor, // Use warning color from app styles
+        'page': 'Important Changes',
+        'url': 'https://2024.xenium.rocks/about/wazne-zmiany/',
+        'iconColor': aboutPartyColor
       },
       {
         'icon': FontAwesomeIcons.question,
         'title': 'First Time Visitor?',
-        'page': 'FirstTimeVisitor',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': primaryColor,
+        'page': 'First Time Visitor?',
+        'url': 'https://2024.xenium.rocks/about/czym-jest-demoscena/',
+        'iconColor': aboutPartyColor,
       },
     ]
   },
@@ -45,41 +44,111 @@ final List<Map<String, dynamic>> drawerItems = [
     'title': 'News',
     'page': 'News',
     'route': AppRouterPaths.news,
-    'iconColor': primaryColor,
+    'iconColor': newsColor, // Vivid Blue
   },
   {
     'icon': FontAwesomeIcons.calendar,
     'title': 'Timetable',
     'page': 'Timetable',
     'route': AppRouterPaths.timeTable,
-    'iconColor': primaryColor,
+    'iconColor': timetableColor, // Sky Blue
   },
   {
     'icon': FontAwesomeIcons.trophy,
     'title': 'Competitions',
     'page': null,
-    'iconColor': infoColor, // Use info color from app styles
+    'iconColor': competitionsColor, // Lime Green
     'subItems': [
       {
         'icon': FontAwesomeIcons.book,
         'title': 'General Rules',
-        'page': 'GeneralRules',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': infoColor,
+        'page': 'General Rules',
+        'url': 'https://2024.xenium.rocks/kompoty/zasady/',
+        'iconColor': competitionsColor,
       },
       {
         'icon': FontAwesomeIcons.desktop,
         'title': 'Demo',
         'page': 'Demo',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': infoColor,
+        'url': 'https://2024.xenium.rocks/kompoty/demo/',
+        'iconColor': competitionsColor,
       },
       {
         'icon': FontAwesomeIcons.code,
-        'title': 'Intro',
-        'page': 'Intro',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': infoColor,
+        'title': 'Intro (256B / 1KB / 4KB / 64KB)',
+        'page': 'Intro (256B / 1KB / 4KB / 64KB)',
+        'url': 'https://2024.xenium.rocks/kompoty/intro-256b-1kb-4kb-64kb/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.paintBrush,
+        'title': 'Freestyle GFX',
+        'page': 'Freestyle GFX',
+        'url': 'https://2024.xenium.rocks/kompoty/freestyle-gfx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.tv,
+        'title': 'Oldschool GFX',
+        'page': 'Oldschool GFX',
+        'url': 'https://2024.xenium.rocks/kompoty/oldschool-gfx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.font,
+        'title': 'ASCII / ANSI / PETSCII GFX',
+        'page': 'ASCII / ANSI / PETSCII GFX',
+        'url': 'https://2024.xenium.rocks/kompoty/ascii-ansii-petscii-gfx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.fileCode,
+        'title': 'Executable GFX',
+        'page': 'Executable GFX',
+        'url': 'https://2024.xenium.rocks/kompoty/executable-gfx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.music,
+        'title': 'Streaming MSX',
+        'page': 'Streaming MSX',
+        'url': 'https://2024.xenium.rocks/kompoty/streaming-msx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.music,
+        'title': 'Tracked MSX',
+        'page': 'Tracked MSX',
+        'url': 'https://2024.xenium.rocks/kompoty/tracked-msx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.music,
+        'title': 'Synth MSX',
+        'page': 'Synth MSX',
+        'url': 'https://2024.xenium.rocks/kompoty/synth-msx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.music,
+        'title': 'Chip MSX',
+        'page': 'Chip MSX',
+        'url': 'https://2024.xenium.rocks/kompoty/chip-msx/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.film,
+        'title': 'Anim',
+        'page': 'Anim',
+        'url': 'https://2024.xenium.rocks/kompoty/anim/',
+        'iconColor': competitionsColor,
+      },
+      {
+        'icon': FontAwesomeIcons.asterisk,
+        'title': 'Wild',
+        'page': 'Wild',
+        'url': 'https://2024.xenium.rocks/kompoty/wild/',
+        'iconColor': competitionsColor,
       },
     ]
   },
@@ -87,35 +156,35 @@ final List<Map<String, dynamic>> drawerItems = [
     'icon': FontAwesomeIcons.handsHelping,
     'title': 'Get Involved',
     'page': null,
-    'iconColor': successColor, // Use success color from app styles
+    'iconColor': getInvolvedColor, // Bright Teal
     'subItems': [
       {
         'icon': FontAwesomeIcons.ticketAlt,
         'title': 'Admission',
         'page': 'Admission',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': successColor,
+        'url': 'https://2024.xenium.rocks/wez-udzial/wstep/',
+        'iconColor': getInvolvedColor,
       },
       {
         'icon': FontAwesomeIcons.signInAlt,
         'title': 'Register',
         'page': 'Register',
         'route': AppRouterPaths.register,
-        'iconColor': successColor,
+        'iconColor': getInvolvedColor,
       },
       {
         'icon': FontAwesomeIcons.fileUpload,
         'title': 'Submit Work',
-        'page': 'SubmitWork',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': successColor,
+        'page': 'Submit Work',
+        'url': 'https://2024.xenium.rocks/wez-udzial/zglos-prace/',
+        'iconColor': getInvolvedColor,
       },
       {
         'icon': FontAwesomeIcons.gavel,
         'title': 'Rules',
         'page': 'Rules',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': successColor,
+        'url': 'https://2024.xenium.rocks/wez-udzial/regulamin/',
+        'iconColor': getInvolvedColor,
       },
     ]
   },
@@ -123,29 +192,43 @@ final List<Map<String, dynamic>> drawerItems = [
     'icon': FontAwesomeIcons.mapMarkerAlt,
     'title': 'Location',
     'page': null,
-    'iconColor': warningColor,
+    'iconColor': locationColor, // Vivid Red
     'subItems': [
       {
         'icon': FontAwesomeIcons.car,
         'title': 'Transportation & Parking',
-        'page': 'TransportationParking',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': warningColor,
+        'page': 'Transportation & Parking',
+        'url': 'https://2024.xenium.rocks/lokalizacja/dojazd/',
+        'iconColor': locationColor,
       },
       {
         'icon': FontAwesomeIcons.bed,
         'title': 'Accommodation',
         'page': 'Accommodation',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': warningColor,
+        'url': 'https://2024.xenium.rocks/lokalizacja/nocleg/',
+        'iconColor': locationColor,
       },
       {
         'icon': FontAwesomeIcons.map,
         'title': 'Party Place',
-        'page': 'PartyPlace',
-        'route': AppRouterPaths.onboarding,
-        'iconColor': warningColor,
+        'page': 'Party Place',
+        'url': 'https://2024.xenium.rocks/lokalizacja/party-place/',
+        'iconColor': locationColor,
       },
     ]
+  },
+  {
+    'icon': FontAwesomeIcons.addressBook,
+    'title': 'Contact',
+    'page': 'Contact',
+    'route': null,
+    'iconColor': contactColor, // Vivid Purple
+  },
+  {
+    'icon': FontAwesomeIcons.users,
+    'title': 'Users',
+    'page': 'Users',
+    'route': null,
+    'iconColor': usersColor, // Light Gray
   },
 ];

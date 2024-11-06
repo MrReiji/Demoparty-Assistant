@@ -8,9 +8,14 @@ class BulletListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Building BulletListWidget');
+    final liElements = ulElement.findAll('li');
+    print('Found ${liElements.length} list items');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: ulElement.findAll('li').map((liElement) {
+      children: liElements.map((liElement) {
+        print('Processing list item: ${liElement.text}');
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
           child: Row(

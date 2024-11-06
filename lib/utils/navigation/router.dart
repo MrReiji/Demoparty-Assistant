@@ -1,3 +1,4 @@
+import 'package:demoparty_assistant/screens/content.dart';
 import 'package:demoparty_assistant/screens/satellites.dart';
 import 'package:demoparty_assistant/screens/seminars.dart';
 import 'package:demoparty_assistant/screens/sponsors.dart';
@@ -65,13 +66,13 @@ class AppRouter {
       //     return Components();
       //   },
       // ),
-      // GoRoute(
-      //   name: 'register',
-      //   path: AppRouterPaths.register,
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return Register();
-      //   },
-      // ),
+      GoRoute(
+        name: 'register',
+        path: AppRouterPaths.register,
+        builder: (BuildContext context, GoRouterState state) {
+          return Register();
+        },
+      ),
       GoRoute(
         name: 'satellites',
         path: AppRouterPaths.satellites,
@@ -85,15 +86,24 @@ class AppRouter {
       //   builder: (BuildContext context, GoRouterState state) {
       //     return SponsorsScreen();
       //   },
-        
+
       // ),
       GoRoute(
         name: 'seminars',
         path: AppRouterPaths.seminars,
         builder: (BuildContext context, GoRouterState state) {
           return SeminarsScreen();
-      },
-),
+        },
+      ),
+      GoRoute(
+        name: 'content',
+        path: AppRouterPaths.content,
+        builder: (BuildContext context, GoRouterState state) {
+          final url = state.uri.queryParameters['url']!;
+          final title = state.uri.queryParameters['title']!;
+          return ContentScreen(url: url, title: title, currentPage: title,);
+        },
+      ),
     ],
   );
 }

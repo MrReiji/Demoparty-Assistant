@@ -72,6 +72,16 @@ const concertColor = Color(0xFFE53935); // Red for concerts
 const deadlineColor = Color(0xFFFFA726); // Orange for deadlines
 const compoColor = Color(0xFF26A69A); // Teal for competitions
 
+// Colors for specific sections in the drawer based on the uploaded palette
+const aboutPartyColor = Color(0xFFF64021);   // Bright Orange-Red for "About the Party"
+const newsColor = Color(0xFFF2002B);         // Vivid Red for "News"
+const timetableColor = Color(0xFF496DDB);    // Vivid Blue for "Timetable"
+const competitionsColor = Color(0xFFF98016); // Bright Orange for "Competitions"
+const getInvolvedColor = Color(0xFF7209B7);  // Vivid Purple for "Get Involved"
+const locationColor = Color(0xFF00CC66);     // Bright Green for "Location"
+const contactColor = Color(0xFFA01A7D);      // Magenta for "Contact"
+const usersColor = Color(0xFFFCC00B);        // Bright Yellow for "Users"
+
 
 // Other colors
 const neutralColor = Color.fromRGBO(255, 255, 255, 0.2);

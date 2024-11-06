@@ -34,6 +34,11 @@ class SubDrawerTile extends StatelessWidget {
               ? primaryColor.withOpacity(0.2)
               : backgroundColor.withOpacity(0.5),
           borderRadius: BorderRadius.circular(borderRadiusValue),
+          border: Border.all(
+            color: isSelected
+                ? primaryColor
+                : textColor.withOpacity(0.1),
+          ),
         ),
         child: Row(
           children: [
