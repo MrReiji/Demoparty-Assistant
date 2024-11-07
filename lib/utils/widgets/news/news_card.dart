@@ -1,22 +1,24 @@
-import 'package:demoparty_assistant/constants/app_styles.dart';
+// NewsCard.dart
+import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:demoparty_assistant/constants/models/news_model.dart';
 import 'package:demoparty_assistant/screens/news_content.dart';
-import 'package:flutter/material.dart';
 
 class NewsCard extends StatelessWidget {
   final NewsModel news;
 
-  NewsCard({required this.news});
+  const NewsCard({required this.news, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => NewsContentScreen(
+            builder: (_) => NewsContentScreen(
               title: news.title,
               image: news.imageUrl,
               articleUrl: news.articleUrl,
@@ -25,16 +27,20 @@ class NewsCard extends StatelessWidget {
         );
       },
       child: Card(
-        margin: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-        elevation: 8,
+        margin: EdgeInsets.symmetric(
+          vertical: AppDimensions.paddingMedium,
+          horizontal: AppDimensions.paddingMedium,
+        ),
+        elevation: AppDimensions.elevation / 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius:
+                  BorderRadius.circular(AppDimensions.borderRadius * 2),
               child: AspectRatio(
                 aspectRatio: 7 / 5,
                 child: Image.network(
@@ -44,19 +50,23 @@ class NewsCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: EdgeInsets.all(AppDimensions.paddingMedium),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Wrap(
-                    spacing: 8.0,
-                    runSpacing: 4.0,
+                    spacing: AppDimensions.paddingSmall,
+                    runSpacing: AppDimensions.paddingSmall / 2,
                     children: news.categories.map((category) {
                       return Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppDimensions.paddingSmall,
+                          vertical: AppDimensions.paddingSmall / 2,
+                        ),
                         decoration: BoxDecoration(
                           color: secondaryColor.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius:
+                              BorderRadius.circular(AppDimensions.borderRadius / 2),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -66,12 +76,11 @@ class NewsCard extends StatelessWidget {
                               color: theme.iconTheme.color!.withOpacity(0.8),
                               size: 16.0,
                             ),
-                            const SizedBox(width: 4.0),
+                            SizedBox(width: AppDimensions.paddingSmall / 2),
                             Text(
                               category,
-                              style: TextStyle(
+                              style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onSurface.withOpacity(0.8),
-                                fontSize: 12.0,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -80,10 +89,12 @@ class NewsCard extends StatelessWidget {
                       );
                     }).toList(),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: AppDimensions.paddingSmall),
                   Text(
                     news.title,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ],
               ),

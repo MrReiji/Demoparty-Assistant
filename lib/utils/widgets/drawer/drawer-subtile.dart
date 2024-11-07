@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/app_styles.dart';
+import 'package:demoparty_assistant/constants/theme.dart';
 
 class SubDrawerTile extends StatelessWidget {
   final String title;
@@ -8,13 +8,14 @@ class SubDrawerTile extends StatelessWidget {
   final bool isSelected;
   final Color? iconColor;
 
-  SubDrawerTile({
+  const SubDrawerTile({
     required this.title,
     required this.icon,
     required this.onTap,
     this.isSelected = false,
     this.iconColor,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +28,16 @@ class SubDrawerTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 2),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        margin: EdgeInsets.symmetric(vertical: AppDimensions.paddingSmall / 4),
+        padding: EdgeInsets.symmetric(
+          vertical: AppDimensions.paddingSmall,
+          horizontal: AppDimensions.paddingMedium - AppDimensions.paddingSmall,
+        ),
         decoration: BoxDecoration(
           color: isSelected
               ? primaryColor.withOpacity(0.2)
               : backgroundColor.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(borderRadiusValue),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
           border: Border.all(
             color: isSelected
                 ? primaryColor
@@ -49,7 +53,7 @@ class SubDrawerTile extends StatelessWidget {
                   ? iconThemeColor
                   : (iconColor ?? iconThemeColor)?.withOpacity(0.6),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: AppDimensions.paddingSmall),
             Expanded(
               child: Text(
                 title,

@@ -1,19 +1,22 @@
+// EventCard.dart
 import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/constants/Theme.dart';
 
 class EventCard extends StatelessWidget {
   final String time;
   final IconData icon;
   final String title;
-  final Color color; // Ustawienie koloru z parametru
-  final String label; // Ustawienie własnego tekstu z parametru
+  final Color color;
+  final String label;
 
-  EventCard({
+  const EventCard({
     required this.time,
     required this.icon,
     required this.title,
     required this.color,
-    required this.label
-  });
+    required this.label,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,68 +25,67 @@ class EventCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppDimensions.paddingSmall,
+        vertical: AppDimensions.paddingSmall + AppDimensions.paddingSmall / 2,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sekcja po lewej: ikona i etykieta
+          // Left section: icon and label
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            height: 45,
+            padding: EdgeInsets.symmetric(horizontal: AppDimensions.paddingSmall),
+            height: AppDimensions.eventCardIconContainerHeight,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              color: color, // Kolor z parametru lub domyślny
+              borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+              color: color,
             ),
             child: Row(
               children: [
                 Icon(
                   icon,
                   color: theme.colorScheme.onPrimary,
-                  size: 20.0,
+                  size: AppDimensions.iconSizeSmall + AppDimensions.paddingSmall, // 20.0
                 ),
-                const SizedBox(width: 6.0),
+                SizedBox(width: AppDimensions.paddingSmall),
                 Text(
-                  label, // Tekst etykiety
-                  style: TextStyle(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
                     color: theme.colorScheme.onPrimary,
-                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 20.0),
-
-          // Sekcja po prawej: tytuł i czas
+          SizedBox(width: AppDimensions.paddingLarge),
+          // Right section: title and time
           Expanded(
-            child: Column(  
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tytuł z możliwością zawijania do nowej linii
                 Text(
                   title,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
-                    fontSize: 18
                   ),
                 ),
-                const SizedBox(height: 6.0),
+                SizedBox(height: AppDimensions.paddingSmall / 2),
                 Row(
                   children: [
                     Icon(
                       Icons.access_time,
-                      color: Colors.amberAccent,
-                      size: 16.0,
+                      color: theme.colorScheme.secondary,
+                      size: AppDimensions.iconSizeSmall, // 16.0
                     ),
-                    const SizedBox(width: 4.0),
+                    SizedBox(width: AppDimensions.paddingSmall / 2),
                     Text(
                       time,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.amberAccent,
+                        color: theme.colorScheme.secondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

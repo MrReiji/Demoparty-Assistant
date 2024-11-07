@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'Demoparty Assistant',
       theme: lightThemeData(context), // Light theme
       darkTheme: darkThemeData(context), // Dark theme
-      themeMode: ThemeMode.system, // Follow system theme
+      themeMode: ThemeMode.dark, // Follow system theme
       debugShowCheckedModeBanner: false,
     );
   }

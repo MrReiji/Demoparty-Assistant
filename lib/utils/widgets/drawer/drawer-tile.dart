@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/app_styles.dart';
+import 'package:demoparty_assistant/constants/theme.dart';
 
 class DrawerTile extends StatelessWidget {
   final String title;
@@ -8,13 +8,14 @@ class DrawerTile extends StatelessWidget {
   final bool isSelected;
   final Color? iconColor;
 
-  DrawerTile({
+  const DrawerTile({
     required this.title,
     required this.icon,
     required this.onTap,
     this.isSelected = false,
     this.iconColor,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +28,16 @@ class DrawerTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        margin: EdgeInsets.symmetric(vertical: AppDimensions.paddingSmall / 2),
+        padding: EdgeInsets.symmetric(
+          vertical: AppDimensions.paddingSmall * 1.5,
+          horizontal: AppDimensions.paddingMedium,
+        ),
         decoration: BoxDecoration(
           color: isSelected
               ? primaryColor.withOpacity(0.3)
               : backgroundColor.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(borderRadiusValue),
+          borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
           border: Border.all(
             color: isSelected
                 ? primaryColor
@@ -49,7 +53,7 @@ class DrawerTile extends StatelessWidget {
                   ? iconThemeColor
                   : (iconColor ?? iconThemeColor)?.withOpacity(0.8),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppDimensions.paddingSmall * 1.5),
             Expanded(
               child: Text(
                 title,

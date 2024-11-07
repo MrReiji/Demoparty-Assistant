@@ -1,13 +1,11 @@
 import 'package:demoparty_assistant/screens/content.dart';
-import 'package:demoparty_assistant/screens/satellites.dart';
-import 'package:demoparty_assistant/screens/seminars.dart';
-import 'package:demoparty_assistant/screens/sponsors.dart';
+import 'package:demoparty_assistant/screens/streams.dart';
+import 'package:demoparty_assistant/screens/voting.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:demoparty_assistant/screens/onboarding.dart';
 import 'package:demoparty_assistant/screens/time_table.dart';
-import 'package:demoparty_assistant/screens/settings.dart';
-import 'package:demoparty_assistant/screens/register.dart';
+import 'package:demoparty_assistant/screens/authorization.dart';
 import 'package:demoparty_assistant/screens/news.dart';
 import 'app_router_paths.dart';
 
@@ -24,13 +22,6 @@ class AppRouter {
           return TimeTable();
         },
       ),
-      // GoRoute(
-      //   name: 'settings',
-      //   path: AppRouterPaths.settings,
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return Settings();
-      //   },
-      // ),
       GoRoute(
         name: 'onboarding',
         path: AppRouterPaths.onboarding,
@@ -38,20 +29,6 @@ class AppRouter {
           return Onboarding();
         },
       ),
-      // GoRoute(
-      //   name: 'pro',
-      //   path: AppRouterPaths.pro,
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return Pro();
-      //   },
-      // ),
-      // GoRoute(
-      //   name: 'profile',
-      //   path: AppRouterPaths.profile,
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return Profile();
-      //   },
-      // ),
       GoRoute(
         name: 'news',
         path: AppRouterPaths.news,
@@ -59,49 +36,41 @@ class AppRouter {
           return News();
         },
       ),
-      // GoRoute(
-      //   name: 'components',
-      //   path: AppRouterPaths.components,
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return Components();
-      //   },
-      // ),
       GoRoute(
-        name: 'register',
-        path: AppRouterPaths.register,
+        name: 'streams',
+        path: AppRouterPaths.streams,
         builder: (BuildContext context, GoRouterState state) {
-          return Register();
+          return Streams();
         },
       ),
       GoRoute(
-        name: 'satellites',
-        path: AppRouterPaths.satellites,
+        name: 'Authentication',
+        path: AppRouterPaths.authentication,
         builder: (BuildContext context, GoRouterState state) {
-          return SatellitesScreen();
+          return Authentication();
         },
       ),
-      // GoRoute(
-      //   name: 'sponsors',
-      //   path: AppRouterPaths.sponsors,
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return SponsorsScreen();
-      //   },
-
-      // ),
       GoRoute(
-        name: 'seminars',
-        path: AppRouterPaths.seminars,
-        builder: (BuildContext context, GoRouterState state) {
-          return SeminarsScreen();
-        },
-      ),
+  name: 'Voting',
+  path: AppRouterPaths.voting,
+  builder: (BuildContext context, GoRouterState state) {
+    // Odczytanie przekazanego sessionCookie ze stanu
+    final sessionCookie = state.extra as String;
+    
+    return Voting(sessionCookie: sessionCookie);
+  },
+),
       GoRoute(
         name: 'content',
         path: AppRouterPaths.content,
         builder: (BuildContext context, GoRouterState state) {
           final url = state.uri.queryParameters['url']!;
           final title = state.uri.queryParameters['title']!;
-          return ContentScreen(url: url, title: title, currentPage: title,);
+          return ContentScreen(
+            url: url,
+            title: title,
+            currentPage: title,
+          );
         },
       ),
     ],

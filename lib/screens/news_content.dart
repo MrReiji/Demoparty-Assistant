@@ -1,25 +1,27 @@
+import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/constants/theme.dart';
 import 'package:demoparty_assistant/data/repositories/news_content_repository.dart';
 import 'package:demoparty_assistant/data/services/news_content_service.dart';
-import 'package:demoparty_assistant/utils/widgets/custom_appbar.dart';
-import 'package:flutter/material.dart';
 
 class NewsContentScreen extends StatefulWidget {
   final String title;
   final String image;
   final String articleUrl;
 
-  NewsContentScreen({
+  const NewsContentScreen({
     required this.title,
     required this.image,
     required this.articleUrl,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   _NewsContentScreenState createState() => _NewsContentScreenState();
 }
 
 class _NewsContentScreenState extends State<NewsContentScreen> {
-  final NewsContentService _newsContentService = NewsContentService(NewsContentRepository());
+  final NewsContentService _newsContentService =
+      NewsContentService(NewsContentRepository());
   List<Widget> _contentWidgets = [];
   String? _publishDate;
 
@@ -31,7 +33,8 @@ class _NewsContentScreenState extends State<NewsContentScreen> {
 
   Future<void> _fetchFullContent() async {
     try {
-      final data = await _newsContentService.fetchFullContent(widget.articleUrl);
+      final data =
+          await _newsContentService.fetchFullContent(widget.articleUrl);
 
       setState(() {
         _publishDate = data['publishDate'];
@@ -46,37 +49,50 @@ class _NewsContentScreenState extends State<NewsContentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: CustomAppBar(title: widget.title),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: Text(
+          widget.title,
+      ),),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: EdgeInsets.all(AppDimensions.paddingMedium),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.image.isNotEmpty)
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(widget.image, fit: BoxFit.scaleDown, scale: 1,),
+                  borderRadius:
+                      BorderRadius.circular(AppDimensions.borderRadius),
+                  child: Image.network(
+                    widget.image,
+                    fit: BoxFit.scaleDown,
+                  ),
                 ),
-              SizedBox(height: 20),
+              SizedBox(height: AppDimensions.paddingMedium),
               Text(
                 widget.title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 25), // Adjust the fontSize as needed
+                style: theme.textTheme.headlineLarge,
               ),
               if (_publishDate != null)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding:
+                      EdgeInsets.symmetric(vertical: AppDimensions.paddingSmall),
                   child: Text(
                     "Published on: $_publishDate",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color:
+                          theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                     ),
                   ),
                 ),
-              Divider(color: Theme.of(context).dividerColor, thickness: 1),
+              Divider(
+                color: theme.dividerColor,
+                thickness: theme.dividerTheme.thickness,
+              ),
               ..._contentWidgets,
             ],
           ),

@@ -1,35 +1,48 @@
+// HeadingWidget.dart
 import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/constants/Theme.dart';
 
 class HeadingWidget extends StatelessWidget {
   final String text;
   final int level;
 
-  const HeadingWidget({required this.text, required this.level});
+  const HeadingWidget({required this.text, required this.level, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     TextStyle style;
     switch (level) {
       case 1:
-        style = Theme.of(context).textTheme.headlineLarge!;
+        style = theme.textTheme.displayLarge!.copyWith(
+          fontSize: AppDimensions.headingFontSize1,
+        );
         break;
       case 2:
-        style = Theme.of(context).textTheme.headlineMedium!;
+        style = theme.textTheme.displayMedium!.copyWith(
+          fontSize: AppDimensions.headingFontSize2,
+        );
         break;
       case 3:
-        style = Theme.of(context).textTheme.headlineSmall!;
+        style = theme.textTheme.displaySmall!.copyWith(
+          fontSize: AppDimensions.headingFontSize3,
+        );
         break;
       case 4:
-        style = Theme.of(context).textTheme.titleLarge!;
+        style = theme.textTheme.headlineMedium!.copyWith(
+          fontSize: AppDimensions.headingFontSize4,
+        );
         break;
       case 5:
-        style = Theme.of(context).textTheme.titleMedium!;
+        style = theme.textTheme.headlineSmall!.copyWith(
+          fontSize: AppDimensions.headingFontSize5,
+        );
         break;
       default:
-        style = Theme.of(context).textTheme.titleSmall!;
+        style = theme.textTheme.bodyLarge!;
     }
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingSmall),
       child: Text(
         text,
         style: style,

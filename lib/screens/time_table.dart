@@ -1,10 +1,14 @@
+// TimeTable.dart
+import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/constants/theme.dart';
 import 'package:demoparty_assistant/data/repositories/time_table_repository.dart';
 import 'package:demoparty_assistant/utils/widgets/custom_appbar.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
 import 'package:demoparty_assistant/utils/widgets/timeTable/card-event.dart';
-import 'package:flutter/material.dart';
 
 class TimeTable extends StatefulWidget {
+  const TimeTable({Key? key}) : super(key: key);
+
   @override
   _TimeTableState createState() => _TimeTableState();
 }
@@ -25,19 +29,26 @@ class _TimeTableState extends State<TimeTable> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: CustomAppBar(title: "TimeTable"),
+      appBar: AppBar(title: Text("TimeTable")),
       backgroundColor: theme.scaffoldBackgroundColor,
       drawer: AppDrawer(currentPage: "TimeTable"),
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppDimensions.paddingMedium,
+          vertical: AppDimensions.paddingSmall,
+        ),
         child: timeTableRepository.eventsData.isEmpty
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: theme.colorScheme.primary,
+                ),
+              )
             : SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: timeTableRepository.eventsData.map((dayData) {
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding: EdgeInsets.only(bottom: AppDimensions.paddingMedium),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -48,12 +59,14 @@ class _TimeTableState extends State<TimeTable> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 8.0),
+                          SizedBox(height: AppDimensions.paddingSmall),
                           Column(
                             children: (dayData['events'] as List<Map<String, dynamic>>)
                                 .map((event) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                padding: EdgeInsets.symmetric(
+                                  vertical: AppDimensions.paddingSmall,
+                                ),
                                 child: EventCard(
                                   time: event['time'],
                                   icon: event['icon'],

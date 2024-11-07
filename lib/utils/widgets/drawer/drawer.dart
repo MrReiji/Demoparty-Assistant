@@ -1,14 +1,16 @@
+// AppDrawer.dart
+import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:demoparty_assistant/constants/drawer_items.dart';
 import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer-subtile.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer-tile.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class AppDrawer extends StatefulWidget {
   final String currentPage;
 
-  AppDrawer({required this.currentPage});
+  const AppDrawer({required this.currentPage, Key? key}) : super(key: key);
 
   @override
   _AppDrawerState createState() => _AppDrawerState();
@@ -31,7 +33,10 @@ class _AppDrawerState extends State<AppDrawer> {
 
       if (!hasSubItems) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+          padding: EdgeInsets.symmetric(
+            vertical: AppDimensions.paddingSmall / 2,
+            horizontal: AppDimensions.paddingMedium - AppDimensions.paddingSmall,
+          ),
           child: DrawerTile(
             icon: item['icon'],
             title: item['title'],
@@ -40,12 +45,10 @@ class _AppDrawerState extends State<AppDrawer> {
             onTap: () {
               if (item['route'] != null) {
                 if (widget.currentPage != item['page']) {
-                  context.go(item['route']);
+                  context.push(item['route']);
                 }
               } else if (item['url'] != null) {
-                context.go('${AppRouterPaths.content}?url=${Uri.encodeComponent(item['url'])}&title=${Uri.encodeComponent(item['title'])}');
-              } else {
-                // Obsłuż przypadek, gdy nie ma ani route, ani url
+                context.push('${AppRouterPaths.content}?url=${Uri.encodeComponent(item['url'])}&title=${Uri.encodeComponent(item['title'])}');
               }
             },
           ),
@@ -60,7 +63,10 @@ class _AppDrawerState extends State<AppDrawer> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+            padding: EdgeInsets.symmetric(
+              vertical: AppDimensions.paddingSmall / 2,
+              horizontal: AppDimensions.paddingMedium - AppDimensions.paddingSmall,
+            ),
             child: DrawerTile(
               icon: item['icon'],
               title: item['title'],
@@ -75,7 +81,12 @@ class _AppDrawerState extends State<AppDrawer> {
             ...item['subItems'].map<Widget>((subItem) {
               bool isSubItemSelected = widget.currentPage == subItem['page'];
               return Padding(
-                padding: const EdgeInsets.only(left: 28.0, top: 2.0, bottom: 2.0, right: 6),
+                padding: EdgeInsets.only(
+                  left: AppDimensions.paddingMedium + AppDimensions.paddingSmall,
+                  top: AppDimensions.paddingXXSmall,
+                  bottom: AppDimensions.paddingXXSmall,
+                  right: AppDimensions.paddingSmall,
+                ),
                 child: SubDrawerTile(
                   icon: subItem['icon'],
                   title: subItem['title'],
@@ -84,12 +95,10 @@ class _AppDrawerState extends State<AppDrawer> {
                   onTap: () {
                     if (subItem['route'] != null) {
                       if (widget.currentPage != subItem['page']) {
-                        context.go(subItem['route']);
+                        context.push(subItem['route']);
                       }
                     } else if (subItem['url'] != null) {
-                      context.go('${AppRouterPaths.content}?url=${Uri.encodeComponent(subItem['url'])}&title=${Uri.encodeComponent(subItem['title'])}');
-                    } else {
-                      // Obsłuż przypadek, gdy nie ma ani route, ani url
+                      context.push('${AppRouterPaths.content}?url=${Uri.encodeComponent(subItem['url'])}&title=${Uri.encodeComponent(subItem['title'])}');
                     }
                   },
                 ),
@@ -111,7 +120,10 @@ class _AppDrawerState extends State<AppDrawer> {
               height: MediaQuery.of(context).size.height * 0.1,
               width: double.infinity,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paddingMedium,
+                  vertical: AppDimensions.paddingSmall,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -122,12 +134,12 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
                     SizedBox(
-                      width: 40,
+                      width: AppDimensions.drawerIconButtonWidth,
                       child: IconButton(
                         icon: Icon(
                           Icons.menu,
-                          color: theme.iconTheme.color?.withOpacity(0.82),
-                          size: 24.0,
+                          color: theme.iconTheme.color?.withOpacity(AppOpacities.iconOpacityHigh),
+                          size: AppDimensions.iconSizeMedium,
                         ),
                         onPressed: () {
                           Navigator.pop(context);
@@ -139,22 +151,20 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
             ),
             Divider(
-              height: 1,
-              thickness: 1,
+              height: AppDimensions.dividerHeight,
+              thickness: AppDimensions.dividerThickness,
               color: theme.dividerColor,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppDimensions.paddingSmall),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ..._buildDrawerTiles(),
-                  ],
+                  children: _buildDrawerTiles(),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: AppDimensions.paddingLarge),
           ],
         ),
       ),

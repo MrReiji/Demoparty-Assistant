@@ -1,14 +1,15 @@
-import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
-import 'package:demoparty_assistant/constants/app_styles.dart'; // Import constants
 import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:demoparty_assistant/constants/Theme.dart';
+
 
 class Onboarding extends StatelessWidget {
+  const Onboarding({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Container(
@@ -17,20 +18,20 @@ class Onboarding extends StatelessWidget {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+            padding: EdgeInsets.symmetric(horizontal: AppDimensions.paddingMedium),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Main image with circular shape and shadow
+                // Główne zdjęcie z kształtem koła i cieniem
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
                         color: shadowColor.withOpacity(0.5),
-                        blurRadius: shadowBlurRadius,
-                        offset: shadowOffset,
+                        blurRadius: 10.0, // Możesz zdefiniować blurRadius w theme.dart
+                        offset: Offset(0, 4), // Możesz zdefiniować offset w theme.dart
                       ),
                     ],
                   ),
@@ -39,77 +40,67 @@ class Onboarding extends StatelessWidget {
                       "assets/imgs/xenium_theme_image.png",
                       fit: BoxFit.fill,
                       width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.width * mainImageSizeFactor,
+                      height: MediaQuery.of(context).size.width * 0.6,
                     ),
                   ),
                 ),
-                SizedBox(height: verticalSpacing),
+                SizedBox(height: AppDimensions.paddingLarge),
 
-                // Title text
+                // Tekst tytułu
                 Text(
                   "Xenium 2024\nDemoscene Party",
-                  style: GoogleFonts.tourney(
-                    color: colorScheme.onBackground,
-                    fontSize: titleFontSize,
-                    fontWeight: FontWeight.bold,
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    color: theme.colorScheme.onBackground,
                     letterSpacing: 1,
                     height: 1.2,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: verticalSpacing),
+                SizedBox(height: AppDimensions.paddingLarge),
 
-                // Theme description text
+                // Opis motywu
                 Text(
                   "This Year's Theme: Folk",
-                  style: GoogleFonts.anta(
+                  style: theme.textTheme.headlineMedium?.copyWith(
                     color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
-                    fontSize: themeFontSize,
-                    fontWeight: FontWeight.w400,
                     fontStyle: FontStyle.italic,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: verticalSpacing),
+                SizedBox(height: AppDimensions.paddingLarge),
 
-                // Event details (location and date)
+                // Szczegóły wydarzenia (lokalizacja i data)
                 Column(
                   children: [
                     Text(
                       "Łódź, Poland",
-                      style: GoogleFonts.anta(
+                      style: theme.textTheme.headlineSmall?.copyWith(
                         color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
-                        fontSize: locationFontSize,
-                        fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 8.0),
+                    SizedBox(height: AppDimensions.paddingSmall),
                     Text(
                       "29.08.2024 - 01.09.2024",
-                      style: GoogleFonts.anta(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.textTheme.bodyLarge?.color?.withOpacity(0.6),
-                        fontSize: dateFontSize,
-                        fontWeight: FontWeight.w400,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
-                SizedBox(height: verticalSpacing),
+                SizedBox(height: AppDimensions.paddingLarge),
 
-                // "GET STARTED" button
+                // Przycisk "GET STARTED"
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: colorScheme.onPrimary,
-                      backgroundColor: colorScheme.primary,
-                      padding: EdgeInsets.symmetric(vertical: buttonPadding),
+                      padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(borderRadiusValue),
+                        borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
                       ),
-                      elevation: 10,
+                      elevation: AppDimensions.elevation,
                       shadowColor: shadowColor,
                     ),
                     onPressed: () {
@@ -117,11 +108,10 @@ class Onboarding extends StatelessWidget {
                     },
                     child: Text(
                       "GET STARTED",
-                      style: GoogleFonts.anta(
-                        fontSize: buttonFontSize,
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
-                        color: theme.textTheme.bodyLarge?.color,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     ),
                   ),
