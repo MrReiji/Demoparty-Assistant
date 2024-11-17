@@ -1,8 +1,17 @@
-import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:demoparty_assistant/utils/navigation/router.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-void main() {
+Future<void> requestNotificationPermissions() async {
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await requestNotificationPermissions();
   runApp(const MyApp());
 }
 
@@ -16,9 +25,9 @@ class MyApp extends StatelessWidget {
       routeInformationParser: AppRouter.router.routeInformationParser,
       routeInformationProvider: AppRouter.router.routeInformationProvider,
       title: 'Demoparty Assistant',
-      theme: lightThemeData(context), // Light theme
-      darkTheme: darkThemeData(context), // Dark theme
-      themeMode: ThemeMode.dark, // Follow system theme
+      theme: lightThemeData(context),
+      darkTheme: darkThemeData(context),
+      themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
     );
   }

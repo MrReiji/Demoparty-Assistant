@@ -1,149 +1,160 @@
-// import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/data/services/settings_service.dart';
+import 'package:demoparty_assistant/data/services/notification_service.dart';
+import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
+import 'package:demoparty_assistant/constants/Theme.dart';
+import 'package:demoparty_assistant/utils/widgets/input_widget.dart';
 
+class SettingsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => SettingsFormBloc(),
+      child: Builder(
+        builder: (context) {
+          final formBloc = context.read<SettingsFormBloc>();
+          final theme = Theme.of(context);
 
-// //widgets
-// import 'package:demoparty_assistant/utils/widgets/navbar.dart';
-// import 'package:demoparty_assistant/utils/widgets/table-cell.dart';
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Settings'),
+            ),
+            backgroundColor: theme.scaffoldBackgroundColor,
+            drawer: AppDrawer(currentPage: "Settings"),
+            body: SafeArea(
+              child: FormBlocListener<SettingsFormBloc, String, String>(
+                onSubmitting: (context, state) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (_) => Center(child: CircularProgressIndicator()),
+                  );
+                },
+                onSuccess: (context, state) {
+                  Navigator.of(context).pop(); // Zamknięcie dialogu
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Settings saved successfully!'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                onFailure: (context, state) {
+                  Navigator.of(context).pop(); // Zamknięcie dialogu
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.failureResponse ?? 'Failed to save settings.'),
+                      backgroundColor: theme.colorScheme.error,
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(AppDimensions.paddingLarge),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Notification Reminder Time',
+                        style: theme.textTheme.headlineLarge?.copyWith(color: textColorLight),
+                      ),
+                      SizedBox(height: AppDimensions.paddingMedium),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: InputWidget(
+                              hintText: 'Enter number',
+                              textInputType: TextInputType.number,
+                              fieldBloc: formBloc.reminderValue,
+                            ),
+                          ),
+                          SizedBox(width: AppDimensions.paddingSmall),
+                          Expanded(
+                            flex: 2,
+                            child: InputWidget(
+                              hintText: 'Time Unit',
+                              selectFieldBloc: formBloc.timeUnit,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppDimensions.paddingLarge),
+                      ElevatedButton(
+                        onPressed: formBloc.submit,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+                          ),
+                          backgroundColor: theme.primaryColor,
+                        ),
+                        child: Text(
+                          'Save Settings',
+                          style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
 
-// import 'package:demoparty_assistant/utils/widgets/drawer.dart';
+class SettingsFormBloc extends FormBloc<String, String> {
+  final reminderValue = TextFieldBloc(
+    validators: [
+      FieldBlocValidators.required,
+      numberValidator,
+    ],
+  );
 
-// class Settings extends StatefulWidget {
-//   @override
-//   _SettingsState createState() => _SettingsState();
-// }
+  final timeUnit = SelectFieldBloc<String, dynamic>(
+    items: ['minutes', 'hours', 'days', 'weeks'],
+    validators: [FieldBlocValidators.required],
+  );
 
-// class _SettingsState extends State<Settings> {
-//   late bool switchValueOne;
-//   late bool switchValueTwo;
+  final SettingsService _settingsService = SettingsService();
+  final NotificationService _notificationService = NotificationService();
 
-//   void initState() {
-//     setState(() {
-//       switchValueOne = true;
-//       switchValueTwo = false;
-//     });
-//     super.initState();
-//   }
+  SettingsFormBloc() {
+    addFieldBlocs(fieldBlocs: [reminderValue, timeUnit]);
+    _loadInitialValues();
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         appBar: Navbar(
-//           title: "Settings",
-//         ),
-//         drawer: AppDrawer(currentPage: "Settings"),
-//         body: Container(
-//             child: SingleChildScrollView(
-//           child: Padding(
-//             padding: const EdgeInsets.only(top: 32.0, left: 16, right: 16),
-//             child: Column(
-//               children: [
-//                 Center(
-//                   child: Padding(
-//                     padding: const EdgeInsets.only(top: 8.0),
-//                     child: Text("Recommended Settings",
-//                         style: TextStyle(
-//                             color: AppColors.text,
-//                             fontWeight: FontWeight.w600,
-//                             fontSize: 18)),
-//                   ),
-//                 ),
-//                 Center(
-//                   child: Padding(
-//                     padding: const EdgeInsets.only(top: 8.0),
-//                     child: Text("These are the most important settings",
-//                         style:
-//                             TextStyle(color: AppColors.time, fontSize: 14)),
-//                   ),
-//                 ),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Text("Use FaceID to signin",
-//                         style: TextStyle(color: AppColors.text)),
-//                     Switch.adaptive(
-//                       value: switchValueOne,
-//                       onChanged: (bool newValue) =>
-//                           setState(() => switchValueOne = newValue),
-//                       activeColor: AppColors.primary,
-//                     )
-//                   ],
-//                 ),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                   children: [
-//                     Text("Auto-Lock security",
-//                         style: TextStyle(color: AppColors.text)),
-//                     Switch.adaptive(
-//                       value: switchValueTwo,
-//                       onChanged: (bool newValue) =>
-//                           setState(() => switchValueTwo = newValue),
-//                       activeColor: AppColors.primary,
-//                     )
-//                   ],
-//                 ),
-//                 TableCellSettings(
-//                     title: "Notifications",
-//                     onTap: () {
-//                       Navigator.pushNamed(context, '/pro');
-//                     }),
-//                 SizedBox(height: 36.0),
-//                 Center(
-//                   child: Padding(
-//                     padding: const EdgeInsets.only(top: 16.0),
-//                     child: Text("Payment Settings",
-//                         style: TextStyle(
-//                             color: AppColors.text,
-//                             fontWeight: FontWeight.w600,
-//                             fontSize: 18)),
-//                   ),
-//                 ),
-//                 Center(
-//                   child: Padding(
-//                     padding: const EdgeInsets.only(top: 8.0),
-//                     child: Text("These are also important settings",
-//                         style: TextStyle(color: AppColors.time)),
-//                   ),
-//                 ),
-//                 TableCellSettings(title: "Manage Payment Options"),
-//                 TableCellSettings(title: "Manage Gift Cards"),
-//                 SizedBox(
-//                   height: 36.0,
-//                 ),
-//                 Center(
-//                   child: Padding(
-//                     padding: const EdgeInsets.only(top: 16.0),
-//                     child: Text("Privacy Settings",
-//                         style: TextStyle(
-//                             color: AppColors.text,
-//                             fontWeight: FontWeight.w600,
-//                             fontSize: 18)),
-//                   ),
-//                 ),
-//                 Center(
-//                   child: Padding(
-//                     padding: const EdgeInsets.only(top: 8.0),
-//                     child: Text("Third most important settings",
-//                         style: TextStyle(color: AppColors.time)),
-//                   ),
-//                 ),
-//                 TableCellSettings(
-//                     title: "User Agreement",
-//                     onTap: () {
-//                       Navigator.pushNamed(context, '/pro');
-//                     }),
-//                 TableCellSettings(
-//                     title: "Privacy",
-//                     onTap: () {
-//                       Navigator.pushNamed(context, '/pro');
-//                     }),
-//                 TableCellSettings(
-//                     title: "About",
-//                     onTap: () {
-//                       Navigator.pushNamed(context, '/pro');
-//                     }),
-//               ],
-//             ),
-//           ),
-//         )));
-//   }
-// }
+  Future<void> _loadInitialValues() async {
+    final settings = await _settingsService.getReminderSettings();
+    reminderValue.updateInitialValue(settings['value'].toString());
+    timeUnit.updateInitialValue(settings['unit']);
+  }
+
+  @override
+  Future<void> onSubmitting() async {
+    try {
+      final value = int.parse(reminderValue.value);
+      final unit = timeUnit.value;
+
+      await _settingsService.setReminderSettings(value, unit!);
+
+      emitSuccess(successResponse: 'Settings saved successfully!');
+    } catch (e) {
+      emitFailure(failureResponse: 'Failed to save settings.');
+    }
+  }
+}
+
+String? numberValidator(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'This field is required.';
+  }
+  final number = num.tryParse(value);
+  if (number == null || number <= 0) {
+    return 'Enter a valid number greater than 0.';
+  }
+  return null;
+}

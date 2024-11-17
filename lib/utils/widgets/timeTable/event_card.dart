@@ -1,4 +1,3 @@
-// EventCard.dart
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/constants/Theme.dart';
 
@@ -8,6 +7,7 @@ class EventCard extends StatelessWidget {
   final String title;
   final Color color;
   final String label;
+  final VoidCallback addToCalendar; // Callback for adding event to calendar
 
   const EventCard({
     required this.time,
@@ -15,6 +15,7 @@ class EventCard extends StatelessWidget {
     required this.title,
     required this.color,
     required this.label,
+    required this.addToCalendar, // Constructor parameter for calendar function
     Key? key,
   }) : super(key: key);
 
@@ -47,7 +48,7 @@ class EventCard extends StatelessWidget {
                 Icon(
                   icon,
                   color: theme.colorScheme.onPrimary,
-                  size: AppDimensions.iconSizeSmall + AppDimensions.paddingSmall, // 20.0
+                  size: AppDimensions.iconSizeSmall + AppDimensions.paddingSmall,
                 ),
                 SizedBox(width: AppDimensions.paddingSmall),
                 Text(
@@ -61,7 +62,8 @@ class EventCard extends StatelessWidget {
             ),
           ),
           SizedBox(width: AppDimensions.paddingLarge),
-          // Right section: title and time
+
+          // Right section: title, time, and calendar button
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +81,7 @@ class EventCard extends StatelessWidget {
                     Icon(
                       Icons.access_time,
                       color: theme.colorScheme.secondary,
-                      size: AppDimensions.iconSizeSmall, // 16.0
+                      size: AppDimensions.iconSizeSmall,
                     ),
                     SizedBox(width: AppDimensions.paddingSmall / 2),
                     Text(
@@ -88,6 +90,11 @@ class EventCard extends StatelessWidget {
                         color: theme.colorScheme.secondary,
                         fontWeight: FontWeight.w500,
                       ),
+                    ),
+                    Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.calendar_today, color: theme.colorScheme.primary),
+                      onPressed: addToCalendar, // Adds event to calendar when pressed
                     ),
                   ],
                 ),

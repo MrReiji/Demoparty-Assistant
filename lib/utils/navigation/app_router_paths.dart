@@ -14,4 +14,4 @@ class AppRouterPaths {
   static const content = '/content';
   static const voting = '/voting';
   static const streams = '/streams';
-}
+  }

@@ -82,6 +82,7 @@ const usersColor = Color(0xFFFCC00B); // Bright Yellow for "Users"
 const authenticationColor = Color(0xFF00A8E8); // Bright Cyan for "Authentication"
 const votingColor = Color(0xFF2ECC71); // Emerald Green for "Voting"
 const streamsColor = Color(0xFF9C27B0); // Rich Purple for "Streams"
+const settingsColor = Color(0xFF4A5568); // Slate Gray for "Settings"
 
 
 

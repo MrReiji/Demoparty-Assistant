@@ -1,4 +1,5 @@
 import 'package:demoparty_assistant/screens/content.dart';
+import 'package:demoparty_assistant/screens/settings.dart';
 import 'package:demoparty_assistant/screens/streams.dart';
 import 'package:demoparty_assistant/screens/voting.dart';
 import 'package:flutter/material.dart';
@@ -51,15 +52,15 @@ class AppRouter {
         },
       ),
       GoRoute(
-  name: 'Voting',
-  path: AppRouterPaths.voting,
-  builder: (BuildContext context, GoRouterState state) {
-    // Odczytanie przekazanego sessionCookie ze stanu
-    final sessionCookie = state.extra as String;
-    
-    return Voting(sessionCookie: sessionCookie);
-  },
-),
+        name: 'Voting',
+        path: AppRouterPaths.voting,
+        builder: (BuildContext context, GoRouterState state) {
+          // Odczytanie przekazanego sessionCookie ze stanu
+          final sessionCookie = state.extra as String;
+
+          return Voting(sessionCookie: sessionCookie);
+        },
+      ),
       GoRoute(
         name: 'content',
         path: AppRouterPaths.content,
@@ -71,6 +72,13 @@ class AppRouter {
             title: title,
             currentPage: title,
           );
+        },
+      ),
+      GoRoute(
+        name: 'settings',
+        path: AppRouterPaths.settings,
+        builder: (BuildContext context, GoRouterState state) {
+          return SettingsScreen();
         },
       ),
     ],

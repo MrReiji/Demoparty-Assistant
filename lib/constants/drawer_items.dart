@@ -12,6 +12,13 @@ final List<Map<String, dynamic>> drawerItems = [
     'iconColor': authenticationColor, // Ustal kolor dla Authentication w theme.dart
   },
   {
+  'icon': FontAwesomeIcons.cog,
+  'title': 'Settings',
+  'page': 'Settings',
+  'route': AppRouterPaths.settings,
+  'iconColor': settingsColor,
+},
+  {
     'icon': FontAwesomeIcons.infoCircle,
     'title': 'About the Party',
     'page': null,

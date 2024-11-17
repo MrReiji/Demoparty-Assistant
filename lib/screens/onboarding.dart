@@ -1,15 +1,56 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:demoparty_assistant/utils/widgets/primary_button.dart';
 import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
 import 'package:go_router/go_router.dart';
 import 'package:demoparty_assistant/constants/Theme.dart';
 
-
-class Onboarding extends StatelessWidget {
+class Onboarding extends StatefulWidget {
   const Onboarding({Key? key}) : super(key: key);
+
+  @override
+  _OnboardingState createState() => _OnboardingState();
+}
+
+class _OnboardingState extends State<Onboarding> {
+  Map<String, dynamic>? onboardingData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOnboardingData();
+  }
+
+  // Load JSON data and update the state
+  Future<void> _loadOnboardingData() async {
+    final jsonString = await rootBundle.loadString('assets/data/onboarding_data.json');
+    final jsonData = json.decode(jsonString);
+    setState(() {
+      onboardingData = jsonData;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // Show a loading spinner if data is not yet loaded
+    if (onboardingData == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Extract data from the loaded JSON
+    final imageUrl = onboardingData!['imageUrl'];
+    final eventTitle = onboardingData!['eventTitle'];
+    final year = onboardingData!['year'];
+    final eventType = onboardingData!['eventType'];
+    final themeDescription = onboardingData!['themeDescription'];
+    final themeName = onboardingData!['theme'];
+    final city = onboardingData!['city'];
+    final country = onboardingData!['country'];
+    final startDate = onboardingData!['startDate'];
+    final endDate = onboardingData!['endDate'];
 
     return Scaffold(
       body: Container(
@@ -23,21 +64,21 @@ class Onboarding extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Główne zdjęcie z kształtem koła i cieniem
+                // Main image with circular shape and shadow
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
                         color: shadowColor.withOpacity(0.5),
-                        blurRadius: 10.0, // Możesz zdefiniować blurRadius w theme.dart
-                        offset: Offset(0, 4), // Możesz zdefiniować offset w theme.dart
+                        blurRadius: 10.0,
+                        offset: Offset(0, 4),
                       ),
                     ],
                   ),
                   child: ClipOval(
-                    child: Image.asset(
-                      "assets/imgs/xenium_theme_image.png",
+                    child: Image.network(
+                      imageUrl,
                       fit: BoxFit.fill,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width * 0.6,
@@ -46,9 +87,9 @@ class Onboarding extends StatelessWidget {
                 ),
                 SizedBox(height: AppDimensions.paddingLarge),
 
-                // Tekst tytułu
+                // Event title, year, and type
                 Text(
-                  "Xenium 2024\nDemoscene Party",
+                  "$eventTitle $year\n$eventType",
                   style: theme.textTheme.displayLarge?.copyWith(
                     color: theme.colorScheme.onBackground,
                     letterSpacing: 1,
@@ -58,9 +99,9 @@ class Onboarding extends StatelessWidget {
                 ),
                 SizedBox(height: AppDimensions.paddingLarge),
 
-                // Opis motywu
+                // Theme description and specific theme name
                 Text(
-                  "This Year's Theme: Folk",
+                  "$themeDescription: $themeName",
                   style: theme.textTheme.headlineMedium?.copyWith(
                     color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
                     fontStyle: FontStyle.italic,
@@ -69,11 +110,11 @@ class Onboarding extends StatelessWidget {
                 ),
                 SizedBox(height: AppDimensions.paddingLarge),
 
-                // Szczegóły wydarzenia (lokalizacja i data)
+                // Event details (location and date)
                 Column(
                   children: [
                     Text(
-                      "Łódź, Poland",
+                      "$city, $country",
                       style: theme.textTheme.headlineSmall?.copyWith(
                         color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
                       ),
@@ -81,7 +122,7 @@ class Onboarding extends StatelessWidget {
                     ),
                     SizedBox(height: AppDimensions.paddingSmall),
                     Text(
-                      "29.08.2024 - 01.09.2024",
+                      "$startDate - $endDate",
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.textTheme.bodyLarge?.color?.withOpacity(0.6),
                       ),
@@ -91,30 +132,12 @@ class Onboarding extends StatelessWidget {
                 ),
                 SizedBox(height: AppDimensions.paddingLarge),
 
-                // Przycisk "GET STARTED"
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
-                      ),
-                      elevation: AppDimensions.elevation,
-                      shadowColor: shadowColor,
-                    ),
-                    onPressed: () {
-                      context.go(AppRouterPaths.timeTable);
-                    },
-                    child: Text(
-                      "GET STARTED",
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
+                // "GET STARTED" button
+                PrimaryButton(
+                  text: "GET STARTED",
+                  press: () {
+                    context.go(AppRouterPaths.timeTable);
+                  },
                 ),
               ],
             ),
