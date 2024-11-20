@@ -1,66 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/constants/models/news_model.dart';
 import 'package:demoparty_assistant/data/repositories/news_repository.dart';
-import 'package:demoparty_assistant/utils/widgets/custom_appbar.dart';
-import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
-import 'package:demoparty_assistant/utils/widgets/news/news_card.dart';
+import 'package:get_it/get_it.dart';
 
-class News extends StatefulWidget {
-  const News({Key? key}) : super(key: key);
+class News extends StatelessWidget {
+  final NewsRepository _newsRepository = GetIt.instance<NewsRepository>();
 
-  @override
-  _NewsState createState() => _NewsState();
-}
+  News({Key? key}) : super(key: key);
 
-class _NewsState extends State<News> {
-  late Future<List<NewsModel>> futureNews;
-  final NewsRepository newsRepository = NewsRepository();
-
-  @override
-  void initState() {
-    super.initState();
-    futureNews = newsRepository.fetchNews();
-  }
+  Future<List<NewsModel>> _fetchNews() => _newsRepository.fetchNews();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Demoparty News",
-        ),
-      ),
-      drawer: AppDrawer(currentPage: "News"),
-      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(title: const Text("News")),
       body: FutureBuilder<List<NewsModel>>(
-        future: futureNews,
+        future: _fetchNews(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: theme.colorScheme.primary,
-              ),
-            );
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Failed to load news',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-              ),
-            );
-          } else {
-            final news = snapshot.data!;
-            return ListView.builder(
-              itemCount: news.length,
-              itemBuilder: (context, index) {
-                return NewsCard(news: news[index]);
-              },
-            );
+            return Center(child: Text("Failed to load news: ${snapshot.error}"));
           }
+
+          final news = snapshot.data ?? [];
+          return ListView.builder(
+            itemCount: news.length,
+            itemBuilder: (context, index) => ListTile(
+              title: Text(news[index].title),
+              subtitle: Text(news[index].content),
+            ),
+          );
         },
       ),
     );

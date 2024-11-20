@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/constants/Theme.dart';
 
+/// A card widget to display event details.
+/// Includes title, time, label, and a button to add the event to a calendar.
 class EventCard extends StatelessWidget {
   final String time;
   final IconData icon;
   final String title;
   final Color color;
   final String label;
-  final VoidCallback addToCalendar; // Callback for adding event to calendar
+  final VoidCallback addToCalendar;
 
   const EventCard({
     required this.time,
@@ -15,7 +17,7 @@ class EventCard extends StatelessWidget {
     required this.title,
     required this.color,
     required this.label,
-    required this.addToCalendar, // Constructor parameter for calendar function
+    required this.addToCalendar,
     Key? key,
   }) : super(key: key);
 
@@ -27,76 +29,104 @@ class EventCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
+        ),
       ),
-      padding: EdgeInsets.symmetric(
-        horizontal: AppDimensions.paddingSmall,
-        vertical: AppDimensions.paddingSmall + AppDimensions.paddingSmall / 2,
-      ),
+      padding: const EdgeInsets.all(AppDimensions.paddingMedium),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Left section: icon and label
+          // Icon and Label Section
           Container(
-            padding: EdgeInsets.symmetric(horizontal: AppDimensions.paddingSmall),
-            height: AppDimensions.eventCardIconContainerHeight,
+            width: 80,
+            height: 70,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
               color: color,
+              borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
             ),
-            child: Row(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   icon,
                   color: theme.colorScheme.onPrimary,
-                  size: AppDimensions.iconSizeSmall + AppDimensions.paddingSmall,
+                  size: AppDimensions.iconSizeMedium,
                 ),
-                SizedBox(width: AppDimensions.paddingSmall),
+                const SizedBox(height: AppDimensions.paddingSmall / 2),
                 Text(
                   label,
-                  style: theme.textTheme.labelLarge?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          SizedBox(width: AppDimensions.paddingLarge),
+          const SizedBox(width: AppDimensions.paddingMedium),
 
-          // Right section: title, time, and calendar button
+          // Title and Time Section
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Dynamic title to ensure full visibility
                 Text(
                   title,
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: AppDimensions.paddingSmall / 2),
+                const SizedBox(height: AppDimensions.paddingSmall),
                 Row(
                   children: [
                     Icon(
                       Icons.access_time,
-                      color: theme.colorScheme.secondary,
                       size: AppDimensions.iconSizeSmall,
+                      color: theme.colorScheme.primary,
                     ),
-                    SizedBox(width: AppDimensions.paddingSmall / 2),
+                    const SizedBox(width: AppDimensions.paddingSmall / 2),
                     Text(
                       time,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.secondary,
+                        color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Spacer(),
-                    IconButton(
-                      icon: Icon(Icons.calendar_today, color: theme.colorScheme.primary),
-                      onPressed: addToCalendar, // Adds event to calendar when pressed
-                    ),
                   ],
+                ),
+              ],
+            ),
+          ),
+
+          // Calendar Button Section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.calendar_today,
+                    color: theme.colorScheme.primary,
+                    size: AppDimensions.iconSizeMedium,
+                  ),
+                  onPressed: addToCalendar,
+                  tooltip: 'Add to Calendar',
+                ),
+                const SizedBox(height: AppDimensions.paddingSmall),
+                Text(
+                  'Add to calendar!',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),

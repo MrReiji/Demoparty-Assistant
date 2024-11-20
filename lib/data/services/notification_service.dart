@@ -13,52 +13,33 @@ class NotificationService {
   static const String _channelDescription = 'This channel is used for event notifications';
 
   Future<void> initialize() async {
-    // Initialize timezone database
+    print('[NotificationService] Initializing...');
     tz.initializeTimeZones();
-    final String localTimeZone = 'Europe/Warsaw';
-    tz.setLocalLocation(tz.getLocation(localTimeZone));
+    tz.setLocalLocation(tz.getLocation('Europe/Warsaw'));
+    print('[NotificationService] Timezone initialized to Europe/Warsaw.');
 
-    // Initialize settings for Android
-    const AndroidInitializationSettings androidInitializationSettings =
-    AndroidInitializationSettings('notification_logo');
-
-    // Initialize settings for iOS
-    const DarwinInitializationSettings iOSInitializationSettings = DarwinInitializationSettings();
-
-    // Combine initialization settings
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: iOSInitializationSettings,
+    const initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('notification_logo'),
+      iOS: DarwinInitializationSettings(),
     );
+    await _notificationsPlugin.initialize(initializationSettings);
+    print('[NotificationService] Plugin initialized.');
 
-    // Initialize notifications plugin
-    await _notificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        print('Notification clicked with payload: ${response.payload}');
-      },
-      onDidReceiveBackgroundNotificationResponse: _handleBackgroundNotification,
-    );
-
-    // Create notification channel for Android
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      _channelId,
-      _channelName,
-      description: _channelDescription,
+    const channel = AndroidNotificationChannel(
+      'event_channel',
+      'Event Notifications',
+      description: 'Notifications for scheduled events',
       importance: Importance.max,
-      playSound: true,
     );
-
     await _notificationsPlugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
-
-    print('Notification Service initialized with channel $_channelName.');
+    print('[NotificationService] Notification channel created.');
   }
 
   // Background notification handler
   static Future<void> _handleBackgroundNotification(NotificationResponse response) async {
-    print('Background notification received with payload: ${response.payload}');
+    print('[NotificationService] Background notification received with payload: ${response.payload}');
   }
 
   Future<void> scheduleEventNotification(
@@ -66,16 +47,19 @@ class NotificationService {
     DateTime eventDateTime, {
     String? payload,
   }) async {
-    final reminderTimeInMinutes = await _settingsService.getReminderTimeInMinutes();
+    print('[NotificationService] Scheduling notification...');
+    print('[NotificationService] Title: $title');
+    print('[NotificationService] Event DateTime (UTC): $eventDateTime');
 
-    print('Raw eventDateTime (UTC): $eventDateTime');
+    final reminderTimeInMinutes = await _settingsService.getReminderTimeInMinutes();
+    print('[NotificationService] Reminder time set to $reminderTimeInMinutes minutes before the event.');
 
     final tz.TZDateTime eventTZDateTime = tz.TZDateTime.from(eventDateTime.toUtc(), tz.local);
     final tz.TZDateTime scheduledDate = eventTZDateTime.subtract(Duration(minutes: reminderTimeInMinutes));
 
-    print('Event time (local): $eventTZDateTime');
-    print('Notification time (local): $scheduledDate');
-    print('Current time (local): ${tz.TZDateTime.now(tz.local)}');
+    print('[NotificationService] Event time (local): $eventTZDateTime');
+    print('[NotificationService] Notification scheduled time (local): $scheduledDate');
+    print('[NotificationService] Current time (local): ${tz.TZDateTime.now(tz.local)}');
 
     if (scheduledDate.isAfter(tz.TZDateTime.now(tz.local))) {
       try {
@@ -100,22 +84,24 @@ class NotificationService {
           uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
           payload: payload,
         );
-        print('Notification scheduled for "$title" at $scheduledDate.');
+        print('[NotificationService] Notification scheduled for "$title" at $scheduledDate.');
       } catch (e) {
-        print('Error scheduling notification for "$title": $e');
+        print('[NotificationService] Error scheduling notification for "$title": $e');
       }
     } else {
-      print('Event "$title" is in the past; no notification scheduled.');
+      print('[NotificationService] Event "$title" is in the past; no notification scheduled.');
     }
   }
 
   Future<void> cancelNotification(int id) async {
+    print('[NotificationService] Canceling notification with ID $id...');
     await _notificationsPlugin.cancel(id);
-    print('Notification with ID $id has been canceled.');
+    print('[NotificationService] Notification with ID $id has been canceled.');
   }
 
   Future<void> cancelAllNotifications() async {
+    print('[NotificationService] Canceling all notifications...');
     await _notificationsPlugin.cancelAll();
-    print('All notifications have been canceled.');
+    print('[NotificationService] All notifications have been canceled.');
   }
 }

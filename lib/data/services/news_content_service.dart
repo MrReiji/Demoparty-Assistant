@@ -3,6 +3,7 @@ import 'package:demoparty_assistant/utils/widgets/news/bullet_list_widget.dart';
 import 'package:demoparty_assistant/utils/widgets/news/links_section_widget.dart';
 import 'package:demoparty_assistant/utils/widgets/news/paragraph_widget.dart';
 import 'package:demoparty_assistant/utils/widgets/news/yt_video_widget.dart';
+import 'package:demoparty_assistant/utils/widgets/universal/universal_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -24,11 +25,14 @@ class NewsContentService {
 
     // Add YouTube video widget if a valid video URL is found
     if (data['videoUrl'] != null) {
-      final videoId = YoutubePlayer.convertUrlToId(data['videoUrl']!);
-      if (videoId != null) {
-        contentWidgets.insert(0, YoutubeVideoWidget(videoId: videoId));
-      }
-    }
+  contentWidgets.insert(
+    0,
+    UniversalVideoPlayer(
+      videoUrl: data['videoUrl']!,
+      isEmbedded: true, // Embedded on the news page
+    ),
+  );
+}
 
     return {
       'publishDate': publishDate,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/theme.dart';
-import 'package:demoparty_assistant/data/repositories/news_content_repository.dart';
 import 'package:demoparty_assistant/data/services/news_content_service.dart';
+import 'package:get_it/get_it.dart';
 
 class NewsContentScreen extends StatefulWidget {
   final String title;
@@ -20,8 +19,8 @@ class NewsContentScreen extends StatefulWidget {
 }
 
 class _NewsContentScreenState extends State<NewsContentScreen> {
-  final NewsContentService _newsContentService =
-      NewsContentService(NewsContentRepository());
+  final NewsContentService _newsContentService = GetIt.I<NewsContentService>();
+
   List<Widget> _contentWidgets = [];
   String? _publishDate;
 
@@ -31,18 +30,17 @@ class _NewsContentScreenState extends State<NewsContentScreen> {
     _fetchFullContent();
   }
 
+  /// Fetches the full content of the article, with cache support.
   Future<void> _fetchFullContent() async {
     try {
-      final data =
-          await _newsContentService.fetchFullContent(widget.articleUrl);
-
+      final data = await _newsContentService.fetchFullContent(widget.articleUrl);
       setState(() {
         _publishDate = data['publishDate'];
         _contentWidgets = data['contentWidgets'];
       });
     } catch (e) {
       setState(() {
-        _contentWidgets = [Text("Failed to load content")];
+        _contentWidgets = [const Text("Failed to load content")];
       });
     }
   }
@@ -53,46 +51,32 @@ class _NewsContentScreenState extends State<NewsContentScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.title,
-      ),),
-      backgroundColor: theme.scaffoldBackgroundColor,
+        title: Text(widget.title),
+      ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(AppDimensions.paddingMedium),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.image.isNotEmpty)
                 ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(AppDimensions.borderRadius),
-                  child: Image.network(
-                    widget.image,
-                    fit: BoxFit.scaleDown,
-                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(widget.image, fit: BoxFit.cover),
                 ),
-              SizedBox(height: AppDimensions.paddingMedium),
-              Text(
-                widget.title,
-                style: theme.textTheme.headlineLarge,
-              ),
+              const SizedBox(height: 16.0),
+              Text(widget.title, style: theme.textTheme.headlineMedium),
               if (_publishDate != null)
                 Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: AppDimensions.paddingSmall),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
                     "Published on: $_publishDate",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color:
-                          theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ),
-              Divider(
-                color: theme.dividerColor,
-                thickness: theme.dividerTheme.thickness,
-              ),
+              const Divider(),
               ..._contentWidgets,
             ],
           ),

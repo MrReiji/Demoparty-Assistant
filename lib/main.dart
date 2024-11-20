@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/Theme.dart';
+import 'package:demoparty_assistant/constants/theme.dart';
 import 'package:demoparty_assistant/utils/navigation/router.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:demoparty_assistant/data/services/service_manager.dart';
 
-Future<void> requestNotificationPermissions() async {
-  if (await Permission.notification.isDenied) {
-    await Permission.notification.request();
-  }
-}
-
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await requestNotificationPermissions();
+
+  // Initialize all services and dependencies
+  await ServiceManager.initialize();
+
   runApp(const MyApp());
 }
 

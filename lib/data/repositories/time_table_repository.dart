@@ -1,171 +1,176 @@
 import 'dart:convert';
-import 'package:demoparty_assistant/data/services/notification_service.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
-import 'package:demoparty_assistant/utils/functions/getIconForType.dart';
-import 'package:demoparty_assistant/utils/functions/getColorForType.dart';
 import 'package:demoparty_assistant/data/services/NativeCalendarService.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'package:demoparty_assistant/data/services/cache_service.dart';
+import 'package:demoparty_assistant/data/services/notification_service.dart';
+import 'package:demoparty_assistant/utils/functions/getColorForType.dart';
+import 'package:demoparty_assistant/utils/functions/getIconForType.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class TimeTableRepository {
-  List<Map<String, dynamic>> eventsData = [];
+  final CacheService _cacheService;
   final NotificationService _notificationService;
-  final NativeCalendarService nativeCalendarService = NativeCalendarService();
-  int dateOffset = 79; // Kontrolowany przez dewelopera
+  final NativeCalendarService _nativeCalendarService;
 
+  List<Map<String, dynamic>> eventsData = [];
   DateTime? startDate;
   DateTime? endDate;
+  int dateOffset = 15;
 
-  TimeTableRepository(this._notificationService);
+  TimeTableRepository(
+    this._cacheService,
+    this._notificationService,
+    this._nativeCalendarService,
+  );
 
-  Future<void> initializeServices() async {
-    tz.initializeTimeZones(); // Inicjalizacja danych stref czasowych
-    await _notificationService.initialize();
-    await _loadOnboardingDates();
-    print('Services and dates initialized in TimeTableRepository');
-  }
+  Future<void> loadOnboardingDates() async {
+    try {
+      print('[TimeTableRepository] Loading onboarding dates...');
+      final jsonString = await rootBundle.loadString('assets/data/onboarding_data.json');
+      final jsonData = json.decode(jsonString);
 
-  Future<void> _loadOnboardingDates() async {
-    final jsonString = await rootBundle.loadString('assets/data/onboarding_data.json');
-    final jsonData = json.decode(jsonString);
-    startDate = DateTime.parse(jsonData['startDate']);
-    endDate = DateTime.parse(jsonData['endDate']);
-    print('Loaded dates from JSON: startDate = $startDate, endDate = $endDate');
+      if (jsonData.containsKey('startDate') && jsonData.containsKey('endDate')) {
+        startDate = DateTime.tryParse(jsonData['startDate']);
+        endDate = DateTime.tryParse(jsonData['endDate']);
+
+        if (startDate == null || endDate == null) {
+          throw Exception('Invalid date format in onboarding data.');
+        }
+        print('[TimeTableRepository] Onboarding dates loaded: startDate=$startDate, endDate=$endDate.');
+      } else {
+        throw Exception('Onboarding data is missing required keys.');
+      }
+    } catch (e) {
+      print('[TimeTableRepository] Error loading onboarding dates: $e');
+      throw Exception('Failed to load onboarding dates: $e');
+    }
   }
 
   Future<void> fetchTimetable({bool applyOffset = true}) async {
-    print('Fetching timetable data with date offset: $dateOffset...');
-    final response = await http.get(Uri.parse('https://party.xenium.rocks/timetable'));
+    const cacheKey = 'timetable_data';
+    print('[TimeTableRepository] Fetching timetable data...');
 
-    if (response.statusCode == 200) {
-      BeautifulSoup document = BeautifulSoup(response.body);
-      List<Bs4Element> days = document.findAll('h2');
-      List<Bs4Element> tables = document.findAll('.events');
-      eventsData = _processTimetableData(days, tables, applyOffset);
-      print('Timetable data processed and loaded');
-    } else {
-      print('Failed to load timetable with status code: ${response.statusCode}');
+    final cachedData = _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      print('[TimeTableRepository] Using cached timetable data.');
+      eventsData = List<Map<String, dynamic>>.from(
+        (cachedData as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.get(Uri.parse('https://party.xenium.rocks/timetable'));
+      if (response.statusCode == 200) {
+        print('[TimeTableRepository] Raw HTML response fetched.');
+        final document = BeautifulSoup(response.body);
+        final days = document.findAll('h2');
+        final tables = document.findAll('.events');
+
+        if (days.isEmpty || tables.isEmpty) {
+          throw Exception('No timetable data found in server response.');
+        }
+
+        eventsData = _processTimetableData(days, tables, applyOffset);
+        if (eventsData.isNotEmpty) {
+          final normalizedData = eventsData.map((e) => Map<String, dynamic>.from(e)).toList();
+          await _cacheService.set(cacheKey, normalizedData, 10); // Cache with 10 seconds TTL
+          print('[TimeTableRepository] Timetable data successfully fetched and cached.');
+        } else {
+          throw Exception('Processed timetable data is empty.');
+        }
+      } else {
+        throw Exception('HTTP ${response.statusCode}: Failed to fetch timetable data.');
+      }
+    } catch (e) {
+      print('[TimeTableRepository] Error fetching timetable data: $e');
+      throw Exception('Error fetching timetable data: $e');
     }
   }
 
   List<Map<String, dynamic>> _processTimetableData(
-      List<Bs4Element> days, List<Bs4Element> tables, bool applyOffset) {
-    List<Map<String, dynamic>> extractedData = [];
-    int minLength = (days.length < tables.length) ? days.length : tables.length;
+  List<Bs4Element> days,
+  List<Bs4Element> tables,
+  bool applyOffset,
+) {
+  final weekdayToDateMap = _generateDateMap();
 
+  return List.generate(days.length, (i) {
+    final dayName = days[i].text.trim();
+    DateTime? parsedDate = weekdayToDateMap[dayName];
+
+    if (parsedDate == null) {
+      print('[TimeTableRepository] Warning: No matching date for day name: $dayName');
+      return null; // Ignorujemy dni bez dopasowania
+    }
+
+    if (applyOffset) parsedDate = parsedDate.add(Duration(days: dateOffset));
+
+    final formattedDate =
+        "${DateFormat('EEEE').format(parsedDate)} (${DateFormat('yyyy-MM-dd').format(parsedDate)})";
+    final eventRows = tables[i].findAll('tr');
+    String lastKnownTime = '';
+
+    final events = eventRows.map<Map<String, dynamic>>((row) {
+      final rawTime = row.children[0].text.trim();
+      final time = rawTime.isNotEmpty ? rawTime : lastKnownTime;
+      if (rawTime.isNotEmpty) lastKnownTime = rawTime;
+
+      return {
+        'time': time,
+        'type': row.children[1].text.trim(),
+        'description': row.children[2].text.trim(),
+        'icon': getIconForType(row.children[1].text.trim()).codePoint,
+        'color': getColorForType(row.children[1].text.trim()).value,
+      };
+    }).toList();
+
+    return {
+      'date': formattedDate,
+      'events': events,
+    };
+  }).whereType<Map<String, dynamic>>().toList(); // Filtrowanie null
+}
+
+  Map<String, DateTime> _generateDateMap() {
     if (startDate == null || endDate == null) {
-      print('Error: startDate or endDate is null. Please check JSON data.');
-      return extractedData;
+      throw Exception('Onboarding dates are not loaded.');
     }
 
-    Map<String, DateTime> weekdayToDateMap = _generateDateMap(startDate!, endDate!);
-
-    for (int i = 0; i < minLength; i++) {
-      final rawDay = days[i].text?.trim();
-      DateTime? parsedDate = weekdayToDateMap[rawDay];
-
-      if (parsedDate == null) {
-        print('Invalid weekday encountered: $rawDay');
-        continue;
-      }
-
-      if (applyOffset) {
-        parsedDate = parsedDate.add(Duration(days: dateOffset));
-      }
-
-      final formattedDate =
-          "${DateFormat('EEEE').format(parsedDate)} (${DateFormat('yyyy-MM-dd').format(parsedDate)})";
-      String lastKnownTime = '';
-
-      final events = tables[i].findAll('tr').map((eventRow) {
-        final time = eventRow.children[0].text?.trim();
-        final type = eventRow.children[1].text?.trim() ?? '';
-        final description = eventRow.children[2].text?.trim() ?? '';
-
-        final displayTime = (time?.isNotEmpty ?? false) ? time! : lastKnownTime;
-        lastKnownTime = displayTime;
-
-        DateTime? eventDateTime;
-        try {
-          final timeParts = displayTime.split(':');
-          eventDateTime = tz.TZDateTime(
-            tz.local,
-            parsedDate!.year,
-            parsedDate.month,
-            parsedDate.day,
-            int.parse(timeParts[0]), // Godzina
-            int.parse(timeParts[1]), // Minuty
-          );
-          print('Parsed event date and time (local): $eventDateTime');
-        } catch (e) {
-          print('Error parsing date and time: ${parsedDate!.toIso8601String()} $displayTime');
-          return <String, dynamic>{};
-        }
-
-        // Schedule notification
-        if (eventDateTime.isAfter(tz.TZDateTime.now(tz.local))) {
-          try {
-            _notificationService.scheduleEventNotification(
-              description,
-              eventDateTime,
-              payload: 'Event: $description at $eventDateTime',
-            );
-          } catch (e) {
-            print('Failed to schedule notification for "$description": $e');
-          }
-        } else {
-          print('Event "$description" is in the past; no notification scheduled.');
-        }
-
-        return {
-          'time': displayTime,
-          'type': type,
-          'description': description,
-          'icon': getIconForType(type),
-          'color': getColorForType(type),
-        };
-      }).where((event) => event.isNotEmpty).toList();
-
-      extractedData.add({'date': formattedDate, 'events': events});
-      print('Processed events for date: $formattedDate');
+    final map = <String, DateTime>{};
+    var currentDate = startDate!;
+    while (!currentDate.isAfter(endDate!)) {
+      final weekday = DateFormat('EEEE').format(currentDate);
+      map[weekday] = currentDate;
+      currentDate = currentDate.add(const Duration(days: 1));
     }
-
-    print('Processed and applied date offset to timetable data');
-    return extractedData;
+    return map;
   }
 
-  Map<String, DateTime> _generateDateMap(DateTime startDate, DateTime endDate) {
-    Map<String, DateTime> weekdayToDateMap = {};
-    DateTime currentDate = startDate;
+  Future<void> addEventToCalendar(String date, String time, String description, String type) async {
+    final match = RegExp(r'\((\d{4}-\d{2}-\d{2})\)').firstMatch(date);
+    if (match != null) {
+      final dateStr = match.group(1)!;
+      final parsedDate = DateTime.parse(dateStr);
+      final timeParts = time.split(':');
+      final eventStartTime = DateTime(
+        parsedDate.year,
+        parsedDate.month,
+        parsedDate.day,
+        int.parse(timeParts[0]),
+        int.parse(timeParts[1]),
+      );
 
-    while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
-      String weekday = DateFormat('EEEE').format(currentDate);
-      weekdayToDateMap.putIfAbsent(weekday, () => currentDate);
-      currentDate = currentDate.add(Duration(days: 1));
+      await _nativeCalendarService.addEventToNativeCalendar(
+        title: description,
+        start: eventStartTime,
+        end: eventStartTime.add(const Duration(hours: 1)),
+        description: type,
+        location: 'Default Location',
+        allDay: false,
+      );
     }
-
-    print('Weekday to date mapping generated: $weekdayToDateMap');
-    return weekdayToDateMap;
-  }
-
-  Future<void> addEventToCalendar(
-      String title, String description, DateTime start, DateTime end,
-      {String? location}) async {
-    print('Próba dodania wydarzenia do kalendarza:');
-    print('Tytuł: $title');
-    print('Opis: $description');
-    print('Czas rozpoczęcia: $start');
-    print('Czas zakończenia: $end');
-    nativeCalendarService.addEventToNativeCalendar(
-      title: title,
-      start: start,
-      end: end,
-      description: description,
-      location: location ?? 'Łódź, Poland',
-      allDay: false,
-    );
   }
 }
