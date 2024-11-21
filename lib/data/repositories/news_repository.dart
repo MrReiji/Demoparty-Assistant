@@ -38,7 +38,9 @@ class NewsRepository {
         final title = article.find('h3', class_: 'title')?.text?.trim() ?? 'No title';
         final articleUrl = article.find('a', class_: 'entire-meta-link')?.attributes['href'] ?? '';
         final imageUrl = article.find('span', class_: 'post-featured-img')?.find('img')?.attributes['src'] ?? '';
-        final categories = article.findAll('span', class_: 'meta-category').map((e) => e.text.trim()).toList();
+        var categoryElements = article.findAll('span', class_: 'meta-category').expand((span) {
+          return span.findAll('a').map((a) => a.text.trim());
+        }).toList();
         final content = article.find('p', class_: 'excerpt')?.text ?? '';
 
         newsList.add(NewsModel(
@@ -47,7 +49,7 @@ class NewsRepository {
           fullContent: '',
           imageUrl: imageUrl,
           articleUrl: articleUrl,
-          categories: categories,
+          categories: categoryElements,
         ));
       }
 

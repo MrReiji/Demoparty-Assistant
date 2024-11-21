@@ -15,23 +15,21 @@ class NewsContentScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NewsContentScreenState createState() => _NewsContentScreenState();
+  State<NewsContentScreen> createState() => _NewsContentScreenState();
 }
 
 class _NewsContentScreenState extends State<NewsContentScreen> {
   final NewsContentService _newsContentService = GetIt.I<NewsContentService>();
-
   List<Widget> _contentWidgets = [];
   String? _publishDate;
 
   @override
   void initState() {
     super.initState();
-    _fetchFullContent();
+    _fetchContent();
   }
 
-  /// Fetches the full content of the article, with cache support.
-  Future<void> _fetchFullContent() async {
+  Future<void> _fetchContent() async {
     try {
       final data = await _newsContentService.fetchFullContent(widget.articleUrl);
       setState(() {
@@ -39,8 +37,11 @@ class _NewsContentScreenState extends State<NewsContentScreen> {
         _contentWidgets = data['contentWidgets'];
       });
     } catch (e) {
+      print("[NewsContentScreen] Error: $e");
       setState(() {
-        _contentWidgets = [const Text("Failed to load content")];
+        _contentWidgets = [
+          const Text("Failed to load content. Please check your connection."),
+        ];
       });
     }
   }
@@ -50,36 +51,43 @@ class _NewsContentScreenState extends State<NewsContentScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.image.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(widget.image, fit: BoxFit.cover),
-                ),
-              const SizedBox(height: 16.0),
-              Text(widget.title, style: theme.textTheme.headlineMedium),
-              if (_publishDate != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    "Published on: $_publishDate",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.image.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.network(
+                  widget.image,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.broken_image,
+                    size: 100,
+                    color: theme.colorScheme.error,
                   ),
                 ),
-              const Divider(),
-              ..._contentWidgets,
-            ],
-          ),
+              ),
+            const SizedBox(height: 16.0),
+            Text(widget.title, style: theme.textTheme.headlineMedium),
+            if (_publishDate != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  "Published on: $_publishDate",
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+              ),
+            const Divider(),
+            if (_contentWidgets.isNotEmpty)
+              ..._contentWidgets
+            else
+              const Text("No content available."),
+          ],
         ),
       ),
     );

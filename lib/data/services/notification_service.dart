@@ -1,23 +1,20 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:get_it/get_it.dart';
 import 'settings_service.dart';
+import 'package:demoparty_assistant/data/repositories/time_table_repository.dart';
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
   final SettingsService _settingsService = SettingsService();
 
-  // Notification channel constants
   static const String _channelId = 'event_channel';
   static const String _channelName = 'Event Notifications';
   static const String _channelDescription = 'This channel is used for event notifications';
 
   Future<void> initialize() async {
     print('[NotificationService] Initializing...');
-    tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('Europe/Warsaw'));
-    print('[NotificationService] Timezone initialized to Europe/Warsaw.');
-
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('notification_logo'),
       iOS: DarwinInitializationSettings(),
@@ -26,9 +23,9 @@ class NotificationService {
     print('[NotificationService] Plugin initialized.');
 
     const channel = AndroidNotificationChannel(
-      'event_channel',
-      'Event Notifications',
-      description: 'Notifications for scheduled events',
+      _channelId,
+      _channelName,
+      description: _channelDescription,
       importance: Importance.max,
     );
     await _notificationsPlugin
@@ -37,36 +34,21 @@ class NotificationService {
     print('[NotificationService] Notification channel created.');
   }
 
-  // Background notification handler
-  static Future<void> _handleBackgroundNotification(NotificationResponse response) async {
-    print('[NotificationService] Background notification received with payload: ${response.payload}');
-  }
-
   Future<void> scheduleEventNotification(
     String title,
     DateTime eventDateTime, {
     String? payload,
   }) async {
-    print('[NotificationService] Scheduling notification...');
-    print('[NotificationService] Title: $title');
-    print('[NotificationService] Event DateTime (UTC): $eventDateTime');
-
     final reminderTimeInMinutes = await _settingsService.getReminderTimeInMinutes();
-    print('[NotificationService] Reminder time set to $reminderTimeInMinutes minutes before the event.');
-
     final tz.TZDateTime eventTZDateTime = tz.TZDateTime.from(eventDateTime.toUtc(), tz.local);
     final tz.TZDateTime scheduledDate = eventTZDateTime.subtract(Duration(minutes: reminderTimeInMinutes));
-
-    print('[NotificationService] Event time (local): $eventTZDateTime');
-    print('[NotificationService] Notification scheduled time (local): $scheduledDate');
-    print('[NotificationService] Current time (local): ${tz.TZDateTime.now(tz.local)}');
 
     if (scheduledDate.isAfter(tz.TZDateTime.now(tz.local))) {
       try {
         await _notificationsPlugin.zonedSchedule(
           eventDateTime.hashCode,
           title,
-          'Your event "$title" starts in $reminderTimeInMinutes minutes!',
+          'Your event "$title" starts soon!',
           scheduledDate,
           NotificationDetails(
             android: AndroidNotificationDetails(
@@ -93,15 +75,39 @@ class NotificationService {
     }
   }
 
-  Future<void> cancelNotification(int id) async {
-    print('[NotificationService] Canceling notification with ID $id...');
-    await _notificationsPlugin.cancel(id);
-    print('[NotificationService] Notification with ID $id has been canceled.');
-  }
-
   Future<void> cancelAllNotifications() async {
     print('[NotificationService] Canceling all notifications...');
     await _notificationsPlugin.cancelAll();
     print('[NotificationService] All notifications have been canceled.');
+  }
+
+  Future<void> rescheduleAllNotifications() async {
+    print('[NotificationService] Re-scheduling all notifications...');
+    try {
+      final timetableRepository = GetIt.I<TimeTableRepository>();
+      final events = timetableRepository.eventsData;
+
+      for (final day in events) {
+        final date = day['date'] as String;
+        final eventsList = day['events'] as List<dynamic>;
+
+        for (final event in eventsList) {
+          final eventMap = Map<String, dynamic>.from(event as Map);
+          final time = eventMap['time'] as String;
+          final eventDateTime = timetableRepository.parseDateTimeFromCache(date, time);
+
+          if (eventDateTime != null && eventDateTime.isAfter(DateTime.now())) {
+            await scheduleEventNotification(
+              eventMap['description'] ?? 'Event',
+              eventDateTime,
+              payload: eventMap['type'] ?? 'General',
+            );
+          }
+        }
+      }
+      print('[NotificationService] All notifications re-scheduled successfully.');
+    } catch (e) {
+      print('[NotificationService] Error re-scheduling notifications: $e');
+    }
   }
 }

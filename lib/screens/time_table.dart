@@ -14,6 +14,7 @@ class TimeTable extends StatefulWidget {
 class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixin {
   late final TimeTableRepository _repository;
   late Future<void> _dataFuture;
+  List<Widget> _timeTableWidgets = [];
 
   @override
   void initState() {
@@ -28,11 +29,8 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
       await _repository.loadOnboardingDates();
       print('[TimeTable] Loading timetable data...');
       await _repository.fetchTimetable();
-
-      print('[TimeTable] Events data loaded:');
-      for (var day in _repository.eventsData) {
-        print("[TimeTable] Day: ${day['date']}, Events count: ${(day['events'] as List?)?.length ?? 0}");
-      }
+      print('[TimeTable] Generating widgets...');
+      _generateWidgets();
     } catch (e) {
       print('[TimeTable] Error: $e');
       if (mounted) {
@@ -41,6 +39,66 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
         );
       }
     }
+  }
+
+  void _generateWidgets() {
+    if (_timeTableWidgets.isNotEmpty) return; // Avoid regenerating widgets if already present
+
+    final eventsData = _repository.eventsData;
+    print("[TimeTable] Generating widgets for ${eventsData.length} days...");
+
+    _timeTableWidgets = eventsData.map((dayData) {
+      final dayDate = dayData['date'] ?? 'Unknown date';
+      final events = (dayData['events'] as List?)?.map((e) {
+        if (e is Map<dynamic, dynamic>) {
+          return Map<String, dynamic>.from(e);
+        }
+        return e as Map<String, dynamic>;
+      }).toList() ?? [];
+
+      return _buildDayDataWidget(dayDate, events);
+    }).toList();
+  }
+
+  Widget _buildDayDataWidget(String dayDate, List<Map<String, dynamic>> events) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            dayDate,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: theme.colorScheme.onBackground,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          Column(
+            children: events.map((event) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: EventCard(
+                  time: event['time'] ?? '',
+                  icon: IconData(event['icon'] ?? 0xe3c9, fontFamily: event['fontFamily'] ?? 'MaterialIcons'),
+                  title: event['description'] ?? '',
+                  color: Color(event['color'] ?? 0xFFCCCCCC),
+                  label: event['type'] ?? '',
+                  addToCalendar: () => _repository.addEventToCalendar(
+                    dayDate,
+                    event['time'] ?? '',
+                    event['description'] ?? '',
+                    event['type'] ?? '',
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -74,96 +132,36 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
             );
           }
 
-          return _buildTimeTableContent(theme);
+          return _buildTimeTableContent();
         },
       ),
     );
   }
 
-  Widget _buildTimeTableContent(ThemeData theme) {
-    final eventsData = _repository.eventsData;
-
-    print("[TimeTable] Total days available: ${eventsData.length}");
-
-    if (eventsData.isEmpty) {
-      print('[TimeTable] No events data available.');
-      return const Center(
-        child: Text('No timetable data available.'),
-      );
-    }
-
-    // Optymalizacja: użycie ListView.builder zamiast statycznej listy widgetów
-    return ListView.builder(
-      itemCount: eventsData.length,
-      padding: const EdgeInsets.all(8.0),
-      itemBuilder: (context, index) {
-        final dayData = eventsData[index];
-        print("[TimeTable] Rendering day: ${dayData['date']}, Events count: ${(dayData['events'] as List?)?.length ?? 0}");
-        return _buildDayData(dayData, theme);
-      },
-    );
-  }
-
-  Widget _buildDayData(Map<String, dynamic> dayData, ThemeData theme) {
-    print("[TimeTable] Processing day: ${dayData['date']}");
-
-    final events = (dayData['events'] as List?)?.map((e) {
-      if (e is Map<dynamic, dynamic>) {
-        return Map<String, dynamic>.from(e);
-      }
-      return e as Map<String, dynamic>;
-    }).toList() ?? [];
-
-    if (events.isEmpty) {
-      print("[TimeTable] No events found for day: ${dayData['date']}");
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'No events available for ${dayData['date'] ?? 'this day'}.',
-          style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.error),
+  Widget _buildTimeTableContent() {
+    if (_timeTableWidgets.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('No timetable data available.'),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () => setState(() {
+                _dataFuture = _initializeData();
+              }),
+              child: const Text('Retry'),
+            ),
+          ],
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            dayData['date'] ?? '',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.colorScheme.onBackground,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: events.length,
-            itemBuilder: (context, eventIndex) {
-              final event = events[eventIndex];
-              print("[TimeTable] Event details: $event");
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: EventCard(
-                  time: event['time'] ?? '',
-                  icon: IconData(event['icon'] ?? 0xe3c9, fontFamily: 'MaterialIcons'),
-                  title: event['description'] ?? '',
-                  color: Color(event['color'] ?? 0xFFCCCCCC),
-                  label: event['type'] ?? '',
-                  addToCalendar: () => _repository.addEventToCalendar(
-                    dayData['date'] ?? '',
-                    event['time'] ?? '',
-                    event['description'] ?? '',
-                    event['type'] ?? '',
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+    return RefreshIndicator(
+      onRefresh: _initializeData,
+      child: ListView(
+        padding: const EdgeInsets.all(8.0),
+        children: _timeTableWidgets,
       ),
     );
   }

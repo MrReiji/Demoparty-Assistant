@@ -1,16 +1,21 @@
+import 'package:demoparty_assistant/blocs/settings_form_bloc.dart';
 import 'package:demoparty_assistant/data/services/settings_service.dart';
 import 'package:demoparty_assistant/data/services/notification_service.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:demoparty_assistant/constants/Theme.dart';
 import 'package:demoparty_assistant/utils/widgets/input_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SettingsFormBloc(),
+      create: (context) => SettingsFormBloc(
+        GetIt.I<SettingsService>(),
+        GetIt.I<NotificationService>(),
+      ),
       child: Builder(
         builder: (context) {
           final formBloc = context.read<SettingsFormBloc>();
@@ -32,7 +37,7 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
                 onSuccess: (context, state) {
-                  Navigator.of(context).pop(); // Zamknięcie dialogu
+                  Navigator.of(context).pop(); // Close dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Settings saved successfully!'),
@@ -41,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
                 onFailure: (context, state) {
-                  Navigator.of(context).pop(); // Zamknięcie dialogu
+                  Navigator.of(context).pop(); // Close dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.failureResponse ?? 'Failed to save settings.'),
@@ -104,57 +109,4 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class SettingsFormBloc extends FormBloc<String, String> {
-  final reminderValue = TextFieldBloc(
-    validators: [
-      FieldBlocValidators.required,
-      numberValidator,
-    ],
-  );
-
-  final timeUnit = SelectFieldBloc<String, dynamic>(
-    items: ['minutes', 'hours', 'days', 'weeks'],
-    validators: [FieldBlocValidators.required],
-  );
-
-  final SettingsService _settingsService = SettingsService();
-  final NotificationService _notificationService = NotificationService();
-
-  SettingsFormBloc() {
-    addFieldBlocs(fieldBlocs: [reminderValue, timeUnit]);
-    _loadInitialValues();
-  }
-
-  Future<void> _loadInitialValues() async {
-    final settings = await _settingsService.getReminderSettings();
-    reminderValue.updateInitialValue(settings['value'].toString());
-    timeUnit.updateInitialValue(settings['unit']);
-  }
-
-  @override
-  Future<void> onSubmitting() async {
-    try {
-      final value = int.parse(reminderValue.value);
-      final unit = timeUnit.value;
-
-      await _settingsService.setReminderSettings(value, unit!);
-
-      emitSuccess(successResponse: 'Settings saved successfully!');
-    } catch (e) {
-      emitFailure(failureResponse: 'Failed to save settings.');
-    }
-  }
-}
-
-String? numberValidator(String? value) {
-  if (value == null || value.isEmpty) {
-    return 'This field is required.';
-  }
-  final number = num.tryParse(value);
-  if (number == null || number <= 0) {
-    return 'Enter a valid number greater than 0.';
-  }
-  return null;
 }

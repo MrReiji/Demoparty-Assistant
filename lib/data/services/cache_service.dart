@@ -28,7 +28,7 @@ class CacheService {
   }
 
   /// Stores data in the cache with an optional TTL (in seconds).
-  Future<void> set(String key, dynamic value, [int ttl = 10]) async {
+  Future<void> set(String key, dynamic value, [int ttl = 60]) async {
     // TTL domyślnie ustawione na 10 sekund
     final expiry = DateTime.now().add(Duration(seconds: ttl)).toIso8601String();
     await _cacheBox.put(key, {'data': value, 'expiry': expiry});

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/constants/Theme.dart';
 
-/// A card widget to display event details.
-/// Includes title, time, label, and a button to add the event to a calendar.
-class EventCard extends StatelessWidget {
+class EventCard extends StatefulWidget {
   final String time;
   final IconData icon;
   final String title;
@@ -22,117 +20,115 @@ class EventCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _EventCardState createState() => _EventCardState();
+}
+
+class _EventCardState extends State<EventCard> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Zachowanie stanu
     final theme = Theme.of(context);
 
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+        borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
           color: theme.colorScheme.onSurface.withOpacity(0.1),
         ),
       ),
-      padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+      padding: const EdgeInsets.all(16.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Icon and Label Section
-          Container(
-            width: 80,
-            height: 70,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  color: theme.colorScheme.onPrimary,
-                  size: AppDimensions.iconSizeMedium,
-                ),
-                const SizedBox(height: AppDimensions.paddingSmall / 2),
-                Text(
-                  label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppDimensions.paddingMedium),
+          _buildIconSection(theme),
+          const SizedBox(width: 16.0),
+          _buildDetailsSection(theme),
+          _buildCalendarButton(theme),
+        ],
+      ),
+    );
+  }
 
-          // Title and Time Section
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Dynamic title to ensure full visibility
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.paddingSmall),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: AppDimensions.iconSizeSmall,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: AppDimensions.paddingSmall / 2),
-                    Text(
-                      time,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+  Widget _buildIconSection(ThemeData theme) {
+    return Container(
+      width: 80,
+      height: 70,
+      decoration: BoxDecoration(
+        color: widget.color,
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            widget.icon,
+            color: theme.colorScheme.onPrimary,
+            size: 24.0,
           ),
-
-          // Calendar Button Section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.calendar_today,
-                    color: theme.colorScheme.primary,
-                    size: AppDimensions.iconSizeMedium,
-                  ),
-                  onPressed: addToCalendar,
-                  tooltip: 'Add to Calendar',
-                ),
-                const SizedBox(height: AppDimensions.paddingSmall),
-                Text(
-                  'Add to calendar!',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+          const SizedBox(height: 4.0),
+          Text(
+            widget.label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
+
+  Widget _buildDetailsSection(ThemeData theme) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4.0),
+          Row(
+            children: [
+              Icon(
+                Icons.access_time,
+                size: 16.0,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 4.0),
+              Text(
+                widget.time,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalendarButton(ThemeData theme) {
+    return IconButton(
+      icon: Icon(
+        Icons.calendar_today,
+        color: theme.colorScheme.primary,
+        size: 24.0,
+      ),
+      onPressed: widget.addToCalendar,
+      tooltip: 'Add to Calendar',
+    );
+  }
 }
+

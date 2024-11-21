@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 IconData getIconForType(String type) {
-    switch (type.toLowerCase()) {
-      case 'event':
-        return FontAwesomeIcons.calendarDay;
-      case 'seminar':
-        return FontAwesomeIcons.chalkboardUser;
-      case 'concert':
-        return FontAwesomeIcons.music;
-      case 'deadline':
-        return FontAwesomeIcons.exclamationTriangle;
-      case 'compo':
-        return FontAwesomeIcons.laptopCode;
-      default:
-        return FontAwesomeIcons.infoCircle;
-    }
+  switch (type.toLowerCase()) {
+    case 'event':
+      return Icons.event;
+    case 'seminar':
+      return Icons.school;
+    case 'concert':
+      return Icons.music_note;
+    case 'deadline':
+      return Icons.warning;
+    case 'compo':
+      return Icons.code;
+    default:
+      return Icons.info;
   }
+}
