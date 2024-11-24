@@ -1,6 +1,8 @@
+import 'package:demoparty_assistant/screens/contact.dart';
 import 'package:demoparty_assistant/screens/content.dart';
 import 'package:demoparty_assistant/screens/settings.dart';
 import 'package:demoparty_assistant/screens/streams.dart';
+import 'package:demoparty_assistant/screens/users.dart';
 import 'package:demoparty_assistant/screens/voting.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -45,10 +47,24 @@ class AppRouter {
         },
       ),
       GoRoute(
-        name: 'Authentication',
+        name: 'authentication',
         path: AppRouterPaths.authentication,
         builder: (BuildContext context, GoRouterState state) {
           return Authentication();
+        },
+      ),
+      GoRoute(
+        name: 'contact',
+        path: AppRouterPaths.contact,
+        builder: (BuildContext context, GoRouterState state) {
+          return const ContactScreen();
+        },
+      ),
+      GoRoute(
+        name: 'users',
+        path: AppRouterPaths.users,
+        builder: (BuildContext context, GoRouterState state) {
+          return const UsersScreen();
         },
       ),
       GoRoute(

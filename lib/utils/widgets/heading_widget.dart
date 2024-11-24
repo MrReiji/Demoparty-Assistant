@@ -42,7 +42,7 @@ class HeadingWidget extends StatelessWidget {
         style = theme.textTheme.bodyLarge!;
     }
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingSmall),
+      padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium),
       child: Text(
         text,
         style: style,

@@ -10,6 +10,7 @@ class StreamsService {
 
       if (response.statusCode == 200) {
         final BeautifulSoup soup = BeautifulSoup(response.body);
+        print('Fetched live stream data');
 
         // Extract metadata
         final title = soup.find('meta',
@@ -18,11 +19,11 @@ class StreamsService {
             attrs: {'property': 'og:description'})?.attributes['content'];
         final videoElement = soup.find('video', class_: 'fp-engine');
         final videoUrl = videoElement?.attributes['src'];
-
+        print('Video URL: $videoUrl');
         if (title != null && description != null && videoUrl != null) {
           final resolvedUrl =
               videoUrl.startsWith('blob:') ? videoUrl.substring(5) : videoUrl;
-
+          print('Live stream found: $title');
           return {
             'title': title,
             'description': description,

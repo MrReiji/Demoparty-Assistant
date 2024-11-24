@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:demoparty_assistant/utils/functions/loadJson.dart';
 import 'package:demoparty_assistant/utils/widgets/primary_button.dart';
 import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
 import 'package:go_router/go_router.dart';
@@ -22,13 +21,21 @@ class _OnboardingState extends State<Onboarding> {
     _loadOnboardingData();
   }
 
-  // Load JSON data and update the state
+  // Load JSON data and update the state using the loadJson utility
   Future<void> _loadOnboardingData() async {
-    final jsonString = await rootBundle.loadString('assets/data/onboarding_data.json');
-    final jsonData = json.decode(jsonString);
-    setState(() {
-      onboardingData = jsonData;
-    });
+    try {
+      final data = await loadJson('assets/data/onboarding_data.json');
+      setState(() {
+        onboardingData = data;
+      });
+    } catch (e) {
+      print('Error loading onboarding data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load onboarding data: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -37,7 +44,11 @@ class _OnboardingState extends State<Onboarding> {
 
     // Show a loading spinner if data is not yet loaded
     if (onboardingData == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: theme.colorScheme.primary),
+        ),
+      );
     }
 
     // Extract data from the loaded JSON

@@ -234,17 +234,17 @@ final List<Map<String, dynamic>> drawerItems = [
     ]
   },
   {
-    'icon': FontAwesomeIcons.addressBook,
-    'title': 'Contact',
-    'page': 'Contact',
-    'route': null,
-    'iconColor': contactColor, // Vivid Purple
-  },
+  'icon': FontAwesomeIcons.addressBook,
+  'title': 'Contact',
+  'page': 'Contact',
+  'route': AppRouterPaths.contact,
+  'iconColor': contactColor, //Vivid purple
+},
   {
     'icon': FontAwesomeIcons.users,
     'title': 'Users',
     'page': 'Users',
-    'route': null,
+    'route': AppRouterPaths.users,
     'iconColor': usersColor, // Light Gray
   },
   {
