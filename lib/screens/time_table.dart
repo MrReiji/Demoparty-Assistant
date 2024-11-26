@@ -7,6 +7,8 @@ import 'package:demoparty_assistant/data/repositories/time_table_repository.dart
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
 import 'package:get_it/get_it.dart';
 
+/// Displays the timetable with events grouped by day.
+/// Allows searching for events and refreshing the data.
 class TimeTable extends StatefulWidget {
   const TimeTable({Key? key}) : super(key: key);
 
@@ -36,27 +38,28 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
     super.dispose();
   }
 
-  /// Initializes timetable data with error handling.
+  /// Initializes timetable data by fetching events from the repository.
+  /// Optionally forces a data refresh.
   Future<void> _initializeData({bool forceRefresh = false}) async {
     try {
       setState(() => errorMessage = null);
       await _repository.loadOnboardingDates();
       await _repository.fetchTimetable(forceRefresh: forceRefresh);
-      _dayData = List.from(_repository.eventsData); // Copy the original data.
-      setState(() {}); // Refresh the UI after initialization.
+      _dayData = List.from(_repository.eventsData); // Copy original data for filtering.
+      setState(() {});
     } catch (e) {
       ErrorHelper.handleError(e);
       setState(() => errorMessage = ErrorHelper.getErrorMessage(e));
     }
   }
 
-  /// Applies a search filter to the data.
+  /// Applies a search filter to the timetable data.
   void _applyFilter() {
     final query = _searchController.text.toLowerCase();
 
     setState(() {
       if (query.isEmpty) {
-        // If the search field is empty, reset to original data.
+        // Reset to original data if the search field is empty.
         _dayData = List.from(_repository.eventsData);
       } else {
         // Filter each day's events based on the search query.
@@ -78,6 +81,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
   @override
   bool get wantKeepAlive => true;
 
+  /// Builds the main structure of the timetable screen.
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -125,6 +129,7 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
     );
   }
 
+  /// Builds the content of the timetable, including the search field and list of events.
   Widget _buildTimeTableContent(ThemeData theme) {
     return Column(
       children: [
@@ -167,6 +172,8 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
     );
   }
 
+  /// Builds a widget for a specific day's events.
+  /// If there are no events, displays a message instead.
   Widget _buildDayDataWidget(String dayDate, List events) {
     final theme = Theme.of(context);
 
@@ -175,7 +182,6 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Wyświetlenie daty dnia.
           Text(
             dayDate,
             style: theme.textTheme.titleLarge?.copyWith(
@@ -184,35 +190,8 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
             ),
           ),
           const SizedBox(height: 8.0),
-          // Jeśli brak wydarzeń, pokazujemy estetyczny komunikat.
           if (events.isEmpty)
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.event_busy,
-                    color: theme.colorScheme.primary.withOpacity(0.8),
-                    size: 28,
-                  ),
-                  const SizedBox(width: 8.0),
-                  Text(
-                    "No events scheduled for this day",
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.9),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          // Jeśli wydarzenia są, pokazujemy listę.
+            _buildNoEventsMessage(theme)
           else
             Column(
               children: events.map<Widget>((event) {
@@ -235,6 +214,36 @@ class _TimeTableState extends State<TimeTable> with AutomaticKeepAliveClientMixi
                 );
               }).toList(),
             ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds a user-friendly message when there are no events for a specific day.
+  Widget _buildNoEventsMessage(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.event_busy,
+            color: theme.colorScheme.primary.withOpacity(0.8),
+            size: 28,
+          ),
+          const SizedBox(width: 8.0),
+          Text(
+            "No events scheduled for this day",
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.9),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
