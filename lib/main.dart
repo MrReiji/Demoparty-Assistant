@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/theme.dart';
+import 'package:demoparty_assistant/constants/theme/theme.dart';
 import 'package:demoparty_assistant/utils/navigation/router.dart';
 import 'package:demoparty_assistant/data/services/service_manager.dart';
 

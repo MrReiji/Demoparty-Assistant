@@ -1,5 +1,5 @@
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
-import 'package:demoparty_assistant/utils/widgets/heading_widget.dart';
+import 'package:demoparty_assistant/utils/widgets/html_based/heading_widget.dart';
 import 'package:flutter/material.dart';
 import 'custom_list_widget.dart';
 import 'package:demoparty_assistant/utils/widgets/html_based/hiperlink_widgets.dart';

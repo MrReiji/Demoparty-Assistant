@@ -7,8 +7,23 @@ class SettingsService {
   static const int _defaultReminderValue = 32; // Default 15 minutes
   static const String _defaultReminderUnit = 'minutes';
 
+  static const String _cacheEnabledKey = 'cacheEnabled';
+
+  /// Ustawia, czy cache jest włączony.
+  Future<void> setCacheEnabled(bool isEnabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_cacheEnabledKey, isEnabled);
+  }
+
+  /// Sprawdza, czy cache jest włączony (domyślnie true).
+  Future<bool> isCacheEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_cacheEnabledKey) ?? true;
+  }
+
   Future<void> setReminderSettings(int value, String unit) async {
-    print("[SettingsService] Saving reminder settings: value = $value, unit = $unit");
+    print(
+        "[SettingsService] Saving reminder settings: value = $value, unit = $unit");
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_reminderValueKey, value);
@@ -24,10 +39,13 @@ class SettingsService {
     print("[SettingsService] Fetching reminder settings.");
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final int reminderValue = prefs.getInt(_reminderValueKey) ?? _defaultReminderValue;
-      final String reminderUnit = prefs.getString(_reminderUnitKey) ?? _defaultReminderUnit;
+      final int reminderValue =
+          prefs.getInt(_reminderValueKey) ?? _defaultReminderValue;
+      final String reminderUnit =
+          prefs.getString(_reminderUnitKey) ?? _defaultReminderUnit;
 
-      print("[SettingsService] Reminder settings fetched: value = $reminderValue, unit = $reminderUnit");
+      print(
+          "[SettingsService] Reminder settings fetched: value = $reminderValue, unit = $reminderUnit");
       return {'value': reminderValue, 'unit': reminderUnit};
     } catch (e) {
       print("[SettingsService] Error fetching reminder settings: $e");

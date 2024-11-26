@@ -1,6 +1,8 @@
-import 'package:beautiful_soup_dart/beautiful_soup.dart';
-import 'package:demoparty_assistant/data/services/users_service.dart';
+import 'package:demoparty_assistant/utils/widgets/universal/errors/error_display_widget.dart';
+import 'package:demoparty_assistant/utils/widgets/universal/errors/error_helper.dart';
+import 'package:demoparty_assistant/utils/widgets/universal/loading/loading_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:demoparty_assistant/data/services/users_service.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
 import 'package:flag/flag.dart';
 
@@ -15,6 +17,7 @@ class _UsersScreenState extends State<UsersScreen> {
   List<Map<String, String>> users = [];
   List<Map<String, String>> filteredUsers = [];
   Map<String, int> countryStats = {};
+  String? errorMessage;
   bool isLoading = true;
   TextEditingController searchController = TextEditingController();
   String? selectedCountry;
@@ -22,45 +25,45 @@ class _UsersScreenState extends State<UsersScreen> {
   @override
   void initState() {
     super.initState();
-    fetchUsers();
+    _loadUsers();
     searchController.addListener(_filterUsers);
   }
 
-  /// Fetches user data and updates the state.
-  Future<void> fetchUsers() async {
+  /// Loads user data with error handling and caching.
+  Future<void> _loadUsers({bool forceRefresh = false}) async {
     setState(() => isLoading = true);
 
     try {
-      users = await UsersService.fetchUsers();
-      _calculateCountryStats();
-      filteredUsers = List.from(users);
+      final result = await UsersService().fetchUsersWithStats(forceRefresh: forceRefresh);
+      setState(() {
+        users = result['users'];
+        countryStats = result['countryStats'];
+        filteredUsers = _applyFilters(users);
+        errorMessage = null;
+      });
     } catch (e) {
-      print('Error fetching users: $e');
-    }
-
-    setState(() => isLoading = false);
-  }
-
-  /// Calculates the statistics for users by country.
-  void _calculateCountryStats() {
-    countryStats.clear();
-    for (var user in users) {
-      final country = user['country'] ?? 'Unknown';
-      countryStats[country] = (countryStats[country] ?? 0) + 1;
+      ErrorHelper.handleError(e);
+      setState(() => errorMessage = ErrorHelper.getErrorMessage(e));
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
-  /// Filters the users based on the search query or selected country.
-  void _filterUsers() {
+  /// Applies search and country filters to the users list.
+  List<Map<String, String>> _applyFilters(List<Map<String, String>> userList) {
     final query = searchController.text.toLowerCase();
+    return userList.where((user) {
+      final matchesQuery = user['name']!.toLowerCase().contains(query) ||
+          user['country']!.toLowerCase().contains(query);
+      final matchesCountry = selectedCountry == null || user['country'] == selectedCountry;
+      return matchesQuery && matchesCountry;
+    }).toList();
+  }
+
+  /// Filters users when the search query changes.
+  void _filterUsers() {
     setState(() {
-      filteredUsers = users.where((user) {
-        final matchesQuery = user['name']!.toLowerCase().contains(query) ||
-            user['country']!.toLowerCase().contains(query);
-        final matchesCountry =
-            selectedCountry == null || user['country'] == selectedCountry;
-        return matchesQuery && matchesCountry;
-      }).toList();
+      filteredUsers = _applyFilters(users);
     });
   }
 
@@ -71,36 +74,40 @@ class _UsersScreenState extends State<UsersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Users'),
-      ),
-      drawer: AppDrawer(currentPage: 'Users'),
-      body: isLoading
-          ? _buildLoadingIndicator(theme)
-          : Column(
-              children: [
-                _buildSearchBar(theme),
-                _buildStatistics(theme),
-                _buildUserList(theme),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildLoadingIndicator(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: theme.colorScheme.primary),
-          const SizedBox(height: 20),
-          Text(
-            'Loading users...',
-            style: theme.textTheme.bodyLarge,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () async => await _loadUsers(forceRefresh: true),
+            tooltip: 'Refresh',
           ),
         ],
       ),
+      drawer: const AppDrawer(currentPage: 'Users'),
+      body: isLoading
+          ? const LoadingWidget(
+              title: 'Loading Users',
+              message: 'Please wait while we load the user data.',
+            )
+          : errorMessage != null
+              ? ErrorDisplayWidget(
+                  title: 'Error Loading Users',
+                  message: errorMessage!,
+                  onRetry: () => _loadUsers(forceRefresh: true),
+                )
+              : RefreshIndicator(
+                  onRefresh: () async => await _loadUsers(forceRefresh: true),
+                  child: Column(
+                    children: [
+                      _buildSearchBar(theme),
+                      _buildStatistics(theme),
+                      Expanded(child: _buildUserList(theme)),
+                    ],
+                  ),
+                ),
     );
   }
 
+  /// Builds the search bar for filtering users.
   Widget _buildSearchBar(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -119,7 +126,7 @@ class _UsersScreenState extends State<UsersScreen> {
     );
   }
 
-  /// Builds a widget to display statistics about users.
+  /// Builds the statistics section showing total users and country stats.
   Widget _buildStatistics(ThemeData theme) {
     final totalUsers = users.length;
     final countries = countryStats.keys.toList();
@@ -146,12 +153,8 @@ class _UsersScreenState extends State<UsersScreen> {
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    if (selectedCountry == country) {
-                      selectedCountry = null; // Deselect if already selected
-                    } else {
-                      selectedCountry = country; // Select new country
-                    }
-                    _filterUsers();
+                    selectedCountry = isSelected ? null : country;
+                    filteredUsers = _applyFilters(users);
                   });
                 },
                 child: Chip(
@@ -175,19 +178,19 @@ class _UsersScreenState extends State<UsersScreen> {
     );
   }
 
+  /// Builds the list of filtered users.
   Widget _buildUserList(ThemeData theme) {
-    return Expanded(
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: filteredUsers.length,
-        itemBuilder: (context, index) {
-          final user = filteredUsers[index];
-          return _buildUserCard(theme, user);
-        },
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: filteredUsers.length,
+      itemBuilder: (context, index) {
+        final user = filteredUsers[index];
+        return _buildUserCard(theme, user);
+      },
     );
   }
 
+  /// Builds a user card displaying user details.
   Widget _buildUserCard(ThemeData theme, Map<String, String> user) {
     return Card(
       elevation: 5,

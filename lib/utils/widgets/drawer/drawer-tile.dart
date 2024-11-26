@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/theme.dart';
+import 'package:demoparty_assistant/constants/theme/theme.dart';
 
 class DrawerTile extends StatelessWidget {
   final String title;

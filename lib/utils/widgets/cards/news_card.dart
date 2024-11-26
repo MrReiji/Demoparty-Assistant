@@ -1,6 +1,6 @@
 // NewsCard.dart
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/Theme.dart';
+import 'package:demoparty_assistant/constants/theme/Theme.dart';
 import 'package:demoparty_assistant/constants/models/news_model.dart';
 import 'package:demoparty_assistant/screens/news_content.dart';
 

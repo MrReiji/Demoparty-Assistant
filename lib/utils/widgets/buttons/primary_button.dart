@@ -1,4 +1,4 @@
-import 'package:demoparty_assistant/constants/Theme.dart';
+import 'package:demoparty_assistant/constants/theme/Theme.dart';
 import 'package:flutter/material.dart';
 
 

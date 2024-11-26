@@ -1,112 +1,144 @@
-import 'package:demoparty_assistant/blocs/settings_form_bloc.dart';
-import 'package:demoparty_assistant/data/services/settings_service.dart';
-import 'package:demoparty_assistant/data/services/notification_service.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
-import 'package:demoparty_assistant/constants/Theme.dart';
-import 'package:demoparty_assistant/utils/widgets/input_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
+import 'package:demoparty_assistant/blocs/settings_form_bloc.dart';
+import 'package:demoparty_assistant/blocs/cache_settings_form_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:demoparty_assistant/data/services/settings_service.dart';
+import 'package:demoparty_assistant/data/services/notification_service.dart';
+import 'package:demoparty_assistant/data/services/cache_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SettingsFormBloc(
-        GetIt.I<SettingsService>(),
-        GetIt.I<NotificationService>(),
-      ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => NotificationSettingsFormBloc(
+            GetIt.I<SettingsService>(),
+            GetIt.I<NotificationService>(),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => CacheSettingsFormBloc(
+            GetIt.I<CacheService>(),
+            GetIt.I<SettingsService>(),
+          ),
+        ),
+      ],
       child: Builder(
         builder: (context) {
-          final formBloc = context.read<SettingsFormBloc>();
-          final theme = Theme.of(context);
+          final settingsBloc = context.read<NotificationSettingsFormBloc>();
+          final cacheBloc = context.read<CacheSettingsFormBloc>();
 
           return Scaffold(
             appBar: AppBar(
               title: Text('Settings'),
             ),
-            backgroundColor: theme.scaffoldBackgroundColor,
-            drawer: AppDrawer(currentPage: "Settings"),
-            body: SafeArea(
-              child: FormBlocListener<SettingsFormBloc, String, String>(
-                onSubmitting: (context, state) {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (_) => Center(child: CircularProgressIndicator()),
-                  );
-                },
-                onSuccess: (context, state) {
-                  Navigator.of(context).pop(); // Close dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Settings saved successfully!'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-                onFailure: (context, state) {
-                  Navigator.of(context).pop(); // Close dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.failureResponse ?? 'Failed to save settings.'),
-                      backgroundColor: theme.colorScheme.error,
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(AppDimensions.paddingLarge),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Notification Reminder Time',
-                        style: theme.textTheme.headlineLarge?.copyWith(color: textColorLight),
-                      ),
-                      SizedBox(height: AppDimensions.paddingMedium),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: InputWidget(
-                              hintText: 'Enter number',
-                              textInputType: TextInputType.number,
-                              fieldBloc: formBloc.reminderValue,
-                            ),
-                          ),
-                          SizedBox(width: AppDimensions.paddingSmall),
-                          Expanded(
-                            flex: 2,
-                            child: InputWidget(
-                              hintText: 'Time Unit',
-                              selectFieldBloc: formBloc.timeUnit,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: AppDimensions.paddingLarge),
-                      ElevatedButton(
-                        onPressed: formBloc.submit,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
-                          ),
-                          backgroundColor: theme.primaryColor,
-                        ),
-                        child: Text(
-                          'Save Settings',
-                          style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
+            drawer: AppDrawer(currentPage: 'Settings'),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildNotificationSettings(context, settingsBloc),
+                    Divider(),
+                    _buildCacheSettings(context, cacheBloc),
+                  ],
                 ),
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildNotificationSettings(
+      BuildContext context, NotificationSettingsFormBloc bloc) {
+    return FormBlocListener<NotificationSettingsFormBloc, String, String>(
+      onSubmitting: (context, state) => _showLoadingDialog(context),
+      onSuccess: (context, state) {
+        Navigator.of(context).pop(); // Dismiss loading dialog
+        _showSnackbar(context, 'Notifications updated successfully.');
+      },
+      onFailure: (context, state) {
+        Navigator.of(context).pop(); // Dismiss loading dialog
+        _showSnackbar(context, state.failureResponse ?? 'Failed to update notifications.');
+      },
+      child: Column(
+        children: [
+          Text('Notification Reminder Time'),
+          TextFieldBlocBuilder(
+            textFieldBloc: bloc.reminderValue,
+            decoration: InputDecoration(labelText: 'Reminder Value'),
+          ),
+          DropdownFieldBlocBuilder<String>(
+            selectFieldBloc: bloc.timeUnit,
+            decoration: InputDecoration(labelText: 'Time Unit'),
+            itemBuilder: (context, value) => FieldItem(child: Text(value)),
+          ),
+          ElevatedButton(
+            onPressed: bloc.submit,
+            child: Text('Save Notifications Settings'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCacheSettings(BuildContext context, CacheSettingsFormBloc bloc) {
+    return FormBlocListener<CacheSettingsFormBloc, String, String>(
+      onSubmitting: (context, state) => _showLoadingDialog(context),
+      onSuccess: (context, state) {
+        Navigator.of(context).pop(); // Dismiss loading dialog
+        _showSnackbar(context, state.successResponse!);
+      },
+      onFailure: (context, state) {
+        Navigator.of(context).pop(); // Dismiss loading dialog
+        _showSnackbar(context, state.failureResponse ?? 'Failed to update cache settings.');
+      },
+      child: Column(
+        children: [
+          Text('Cache Settings'),
+          TextFieldBlocBuilder(
+            textFieldBloc: bloc.cacheTTL,
+            decoration: InputDecoration(labelText: 'Cache TTL (seconds)'),
+          ),
+          SwitchFieldBlocBuilder(
+            booleanFieldBloc: bloc.useCache,
+            body: Text('Enable Cache'),
+          ),
+          ElevatedButton(
+            onPressed: bloc.submit,
+            child: Text('Update Cache Settings'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              _showLoadingDialog(context);
+              await bloc.clearCache();
+              Navigator.of(context).pop(); // Dismiss loading dialog
+              _showSnackbar(context, 'Cache cleared successfully.');
+            },
+            child: Text('Clear Cache'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  void _showSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:demoparty_assistant/utils/functions/copyToClipboard.dart';
 import 'package:demoparty_assistant/utils/functions/loadJson.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
 import 'package:flutter/material.dart';
@@ -63,10 +64,7 @@ class ContactScreen extends StatelessWidget {
   /// Launches a given URL using the `url_launcher` package or copies text to the clipboard for email addresses.
   void _handleContactAction(BuildContext context, String action, {bool isEmail = false}) async {
     if (isEmail) {
-      Clipboard.setData(ClipboardData(text: action));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Copied $action to clipboard')),
-      );
+      copyToClipboard(context, action);
     } else {
       final url = Uri.parse(action);
       if (await canLaunchUrl(url)) {

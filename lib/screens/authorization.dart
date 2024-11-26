@@ -1,195 +1,185 @@
 import 'package:demoparty_assistant/blocs/authorization_form_bloc.dart';
-import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
+import 'package:demoparty_assistant/constants/theme/Theme.dart';
+import 'package:demoparty_assistant/utils/navigation/auth_path_guard.dart';
+import 'package:demoparty_assistant/utils/widgets/buttons/primary_button.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
-import 'package:demoparty_assistant/utils/widgets/primary_button.dart';
+import 'package:demoparty_assistant/utils/widgets/fields/input_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:demoparty_assistant/constants/Theme.dart';
-import 'package:demoparty_assistant/utils/widgets/input_widget.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Authentication screen widget
-class Authentication extends StatefulWidget {
+/// Authorization screen widget.
+class Authorization extends StatefulWidget {
   @override
-  _AuthenticationState createState() => _AuthenticationState();
+  _AuthorizationState createState() => _AuthorizationState();
 }
 
-class _AuthenticationState extends State<Authentication> {
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
+class _AuthorizationState extends State<Authorization> {
+  final AuthGuard _authGuard = AuthGuard();
+  AuthorizationFormBloc? _formBloc;
+  bool _isLoading = true;
+  bool _isLoggedIn = false;
+  String? _userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeLoginStatus();
+  }
+
+  /// Initializes login status using AuthGuard.
+  Future<void> _initializeLoginStatus() async {
+    final isValid = await _authGuard.isSessionValid();
+    if (isValid) {
+      final storage = GetIt.I<FlutterSecureStorage>();
+      _userName = await storage.read(key: 'user_name') ?? "User";
+    } else {
+      _formBloc = AuthorizationFormBloc();
+    }
+    setState(() {
+      _isLoggedIn = isValid;
+      _isLoading = false;
+    });
+  }
+
+  /// Logs out the user and clears session data using AuthGuard.
+  Future<void> _logout() async {
+    await _authGuard.clearSession();
+    setState(() {
+      _isLoggedIn = false;
+      _formBloc = AuthorizationFormBloc(); // Create new form bloc for login.
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isLoggedIn ? "Welcome, $_userName" : "Authorization"),
+        actions: [
+          if (!_isLoggedIn)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  // Toggle between login and registration forms.
+                  if (_formBloc!.isLogin) {
+                    _formBloc!.switchToRegistration();
+                  } else {
+                    _formBloc!.switchToLogin();
+                  }
+                });
+              },
+              child: Text(
+                _formBloc!.isLogin
+                    ? "Switch to Registration"
+                    : "Switch to Login",
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+        ],
+      ),
+      drawer: AppDrawer(currentPage: "Authorization"),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+          child: _isLoggedIn ? _buildLoggedInUI() : _buildAuthForm(),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the UI for logged-in users.
+  Widget _buildLoggedInUI() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          "Hello, $_userName!",
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: textColorLight,
+              ),
+        ),
+        const SizedBox(height: AppDimensions.paddingMedium),
+        Text(
+          "You are currently logged in.",
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: mutedTextColor,
+              ),
+        ),
+        const SizedBox(height: AppDimensions.paddingMedium),
+        PrimaryButton(
+          text: "LOGOUT",
+          press: _logout,
+          color: Theme.of(context).primaryColor,
+        ),
+      ],
+    );
+  }
+
+  /// Builds the authentication form.
+  Widget _buildAuthForm() {
     return BlocProvider(
-      create: (context) => AuthenticationFormBloc(),
+      create: (_) => _formBloc!,
       child: Builder(
         builder: (context) {
-          final formBloc = context.read<AuthenticationFormBloc>();
           final theme = Theme.of(context);
 
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                formBloc.isLogin ? "Login" : "Registration",
+          return FormBlocListener<AuthorizationFormBloc, String, String>(
+            onLoading: (context, state) {
+              print("Form is loading");
+              _showLoadingDialog(context, theme);
+            },
+            onSubmitting: (context, state) {
+              print("Form is submitting");
+              _showLoadingDialog(context, theme);
+            },
+            onSuccess: (context, state) async {
+              print("Form submission successful");
+              await _initializeLoginStatus();
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.successResponse ?? "Submission Successful"),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    if (formBloc.isLogin) {
-                      formBloc.switchToRegistration();
-                    } else {
-                      formBloc.switchToLogin();
-                    }
-                    setState(() {});
-                  },
-                  child: Text(
-                    formBloc.isLogin ? "Switch to Registration" : "Switch to Login",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            drawer: AppDrawer(currentPage: "Authentication"),
-            backgroundColor: theme.scaffoldBackgroundColor,
-            body: SafeArea(
-              child: FormBlocListener<AuthenticationFormBloc, String, String>(
-                onSubmitting: (context, state) {
-                  CircularProgressIndicator(
-                color: theme.colorScheme.primary,
               );
-                },
-                onSuccess: (context, state) {
-                  // Pobierz ciasteczko sesji po udanym logowaniu
-                  final sessionCookie = formBloc.sessionCookie;
-
-                  // Przekierowanie do ekranu Voting z przekazaniem sessionCookie jako `extra`
-                  context.go(
-                    AppRouterPaths.voting,
-                    extra: sessionCookie,
-                  );
-                },
-                onFailure: (context, state) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.failureResponse ?? "Submission Failed")),
-                  );
-                },
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(AppDimensions.paddingMedium),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (formBloc.isLogin) ...[
-                        Text(
-                          "Login",
-                          style: theme.textTheme.headlineLarge?.copyWith(color: textColorLight),
-                        ),
-                        SizedBox(height: AppDimensions.paddingSmall),
-                        InputWidget(
-                          hintText: "Email",
-                          prefixIcon: Icons.email,
-                          fieldBloc: formBloc.login,
-                        ),
-                        InputWidget(
-                          hintText: "Password",
-                          prefixIcon: Icons.lock,
-                          obscureText: !_isPasswordVisible,
-                          suffixIcon: _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                          onSuffixIconPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                          fieldBloc: formBloc.loginPassword,
-                        ),
-                        SizedBox(height: AppDimensions.paddingMedium),
-                        PrimaryButton(
-                          text: "LOG IN",
-                          press: formBloc.submit,
-                          color: theme.primaryColor,
-                          padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingSmall),
-                        ),
-                      ] else ...[
-                        Text(
-                          "Registration",
-                          style: theme.textTheme.headlineLarge?.copyWith(color: textColorLight),
-                        ),
-                        SizedBox(height: AppDimensions.paddingSmall),
-                        InputWidget(
-                          hintText: "Handle",
-                          prefixIcon: Icons.person,
-                          fieldBloc: formBloc.registerHandle,
-                        ),
-                        InputWidget(
-                          hintText: "Group",
-                          prefixIcon: Icons.group,
-                          fieldBloc: formBloc.registerGroup,
-                        ),
-                        _buildDropdownField("Country", formBloc.registerCountry, theme),
-                        InputWidget(
-                          hintText: "Access Key",
-                          prefixIcon: Icons.vpn_key,
-                          fieldBloc: formBloc.registerAccessKey,
-                        ),
-                        SizedBox(height: AppDimensions.paddingSmall),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // Scan ticket action
-                          },
-                          icon: Icon(FontAwesomeIcons.qrcode, size: AppDimensions.iconSizeSmall),
-                          label: Text("SCAN TICKET"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.secondary,
-                            padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: AppDimensions.paddingMedium),
-                        InputWidget(
-                          hintText: "Password",
-                          prefixIcon: Icons.lock,
-                          obscureText: !_isPasswordVisible,
-                          suffixIcon: _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                          onSuffixIconPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                          fieldBloc: formBloc.registerPassword,
-                        ),
-                        InputWidget(
-                          hintText: "Repeat Password",
-                          prefixIcon: Icons.lock,
-                          obscureText: !_isConfirmPasswordVisible,
-                          suffixIcon: _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                          onSuffixIconPressed: () {
-                            setState(() {
-                              _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                            });
-                          },
-                          fieldBloc: formBloc.registerConfirmPassword,
-                        ),
-                        SizedBox(height: AppDimensions.paddingMedium),
-                        ElevatedButton(
-                          onPressed: formBloc.submit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.primaryColor,
-                            padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingMedium),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
-                            ),
-                          ),
-                          child: Text(
-                            "Register",
-                            style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+            },
+            onFailure: (context, state) {
+              print("Form submission FAILURE");
+              Navigator.of(context).pop(); // Close loading dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.failureResponse ?? "Submission Failed"),
+              ),
+              );
+            },
+            onSubmissionFailed: (context, state) {
+              Navigator.of(context).pop(); // Close loading dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Check your credentials and try again!"),
+              ),
+            );
+            },
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_formBloc!.isLogin) ...[
+                    _buildLoginForm(theme),
+                  ] else ...[
+                    _buildRegistrationForm(theme),
+                  ],
+                ],
               ),
             ),
           );
@@ -198,26 +188,119 @@ class _AuthenticationState extends State<Authentication> {
     );
   }
 
-  Widget _buildDropdownField(String label, SelectFieldBloc<String, dynamic> fieldBloc, ThemeData theme) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingXSmall),
-      child: DropdownFieldBlocBuilder<String>(
-        selectFieldBloc: fieldBloc,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: theme.textTheme.bodyMedium?.copyWith(color: mutedTextColor),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+  /// Builds the login form.
+  Widget _buildLoginForm(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Center(
+            child: Container(
+              width: double.infinity,
+              child: Text(
+                "Log in to access exclusive content!",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            color: textColorLight, fontSize: 30,
+                ),
+              ),
+            ),
           ),
-          filled: true,
-          fillColor: Colors.grey[850],
         ),
-        itemBuilder: (context, value) => FieldItem(
-          child: Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(color: textColorLight),
+        Text(
+          "Login",
+          style: theme.textTheme.headlineLarge?.copyWith(color: textColorLight),
+        ),
+        const SizedBox(height: AppDimensions.paddingSmall),
+        InputWidget(
+          hintText: "Username",
+          prefixIcon: Icons.person,
+          fieldBloc: _formBloc!.login,
+        ),
+        InputWidget(
+          hintText: "Password",
+          prefixIcon: Icons.lock,
+          obscureText: true,
+          fieldBloc: _formBloc!.loginPassword,
+        ),
+        PrimaryButton(
+          text: "LOG IN",
+          press: () => _formBloc!.submit(),
+          color: theme.primaryColor,
+        ),
+      ],
+    );
+  }
+
+  /// Builds the registration form.
+  Widget _buildRegistrationForm(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Center(
+            child: Container(
+              width: double.infinity,
+              child: Text(
+                "Register to join our community!",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            color: textColorLight, fontSize: 30,
+                ),
+              ),
+            ),
           ),
         ),
+        Text(
+          "Create an Account",
+          style: theme.textTheme.headlineLarge?.copyWith(color: textColorLight),
+        ),
+        const SizedBox(height: AppDimensions.paddingSmall),
+        InputWidget(
+          hintText: "Username",
+          prefixIcon: Icons.person,
+          fieldBloc: _formBloc!.registerHandle,
+        ),
+        InputWidget(
+          hintText: "Group",
+          prefixIcon: Icons.group,
+          fieldBloc: _formBloc!.registerGroup,
+        ),
+        InputWidget(
+          hintText: "Access Key",
+          prefixIcon: Icons.vpn_key,
+          fieldBloc: _formBloc!.registerAccessKey,
+        ),
+        InputWidget(
+          hintText: "Password",
+          prefixIcon: Icons.lock,
+          obscureText: true,
+          fieldBloc: _formBloc!.registerPassword,
+        ),
+        InputWidget(
+          hintText: "Confirm Password",
+          prefixIcon: Icons.lock,
+          obscureText: true,
+          fieldBloc: _formBloc!.registerConfirmPassword,
+        ),
+        PrimaryButton(
+          text: "REGISTER",
+          press: () => _formBloc!.submit(),
+          color: theme.primaryColor,
+        ),
+      ],
+    );
+  }
+
+  /// Displays a loading dialog during form submission.
+  void _showLoadingDialog(BuildContext context, ThemeData theme) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(
+        child: CircularProgressIndicator(color: theme.primaryColor),
       ),
     );
   }

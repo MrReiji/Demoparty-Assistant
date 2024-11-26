@@ -6,12 +6,13 @@ class AppRouterPaths {
   static const profile = '/profile';
   static const news = '/news';
   static const components = '/components';
-  static const authentication = '/authentication';
+  static const authorization = '/authorization';
   static const account = '/account';
   static const satellites = '/satellites';
   static const sponsors = '/sponsors';
   static const seminars = '/seminars';
   static const content = '/content';
+  static const voting_results = '/voting_results';
   static const voting = '/voting';
   static const streams = '/streams';
   static const contact = '/contact';

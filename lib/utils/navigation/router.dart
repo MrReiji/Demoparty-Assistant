@@ -4,22 +4,24 @@ import 'package:demoparty_assistant/screens/settings.dart';
 import 'package:demoparty_assistant/screens/streams.dart';
 import 'package:demoparty_assistant/screens/users.dart';
 import 'package:demoparty_assistant/screens/voting.dart';
+import 'package:demoparty_assistant/screens/voting_results.dart';
+import 'package:demoparty_assistant/utils/navigation/auth_path_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:demoparty_assistant/screens/onboarding.dart';
 import 'package:demoparty_assistant/screens/time_table.dart';
 import 'package:demoparty_assistant/screens/authorization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:demoparty_assistant/screens/news.dart';
 import 'app_router_paths.dart';
 
 class AppRouter {
+  static final authGuard = AuthGuard();
   static final router = GoRouter(
-    // refreshListenable: RouterNotifier(),
-    // redirect: (context, state) => RouterNotifier().redirect(context, state),
     initialLocation: AppRouterPaths.onboarding,
     routes: [
       GoRoute(
-        name: 'TimeTable',
+        name: 'timeTable',
         path: AppRouterPaths.timeTable,
         builder: (BuildContext context, GoRouterState state) {
           return TimeTable();
@@ -47,10 +49,10 @@ class AppRouter {
         },
       ),
       GoRoute(
-        name: 'authentication',
-        path: AppRouterPaths.authentication,
+        name: 'authorization',
+        path: AppRouterPaths.authorization,
         builder: (BuildContext context, GoRouterState state) {
-          return Authentication();
+          return Authorization();
         },
       ),
       GoRoute(
@@ -68,15 +70,15 @@ class AppRouter {
         },
       ),
       GoRoute(
-        name: 'Voting',
-        path: AppRouterPaths.voting,
-        builder: (BuildContext context, GoRouterState state) {
-          // Odczytanie przekazanego sessionCookie ze stanu
-          final sessionCookie = state.extra as String;
-
-          return Voting(sessionCookie: sessionCookie);
-        },
-      ),
+      path: '/voting_results',
+      builder: (context, state) => VotingResultsScreen(),
+      redirect: (context, state) async => await authGuard.redirect(state), // Guarded route.
+    ),
+    GoRoute(
+      path: '/voting',
+      builder: (context, state) => VotingScreen(),
+      redirect: (context, state) async => await authGuard.redirect(state), // Guarded route.
+    ),
       GoRoute(
         name: 'content',
         path: AppRouterPaths.content,

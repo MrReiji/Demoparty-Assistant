@@ -1,9 +1,12 @@
+import 'package:demoparty_assistant/constants/theme/Theme.dart';
+import 'package:demoparty_assistant/utils/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/utils/functions/loadJson.dart';
-import 'package:demoparty_assistant/utils/widgets/primary_button.dart';
 import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
+import 'package:get_it/get_it.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:demoparty_assistant/data/services/cache_service.dart';
 import 'package:go_router/go_router.dart';
-import 'package:demoparty_assistant/constants/Theme.dart';
 
 class Onboarding extends StatefulWidget {
   const Onboarding({Key? key}) : super(key: key);
@@ -13,6 +16,7 @@ class Onboarding extends StatefulWidget {
 }
 
 class _OnboardingState extends State<Onboarding> {
+  final CacheService _cacheService = GetIt.I<CacheService>();
   Map<String, dynamic>? onboardingData;
 
   @override
@@ -75,7 +79,7 @@ class _OnboardingState extends State<Onboarding> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Main image with circular shape and shadow
+                // Main image with circular shape and shadow, using CachedNetworkImage for caching
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -88,8 +92,15 @@ class _OnboardingState extends State<Onboarding> {
                     ],
                   ),
                   child: ClipOval(
-                    child: Image.network(
-                      imageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      placeholder: (context, url) => CircularProgressIndicator(
+                        color: theme.colorScheme.primary,
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.error,
+                        color: theme.colorScheme.error,
+                      ),
                       fit: BoxFit.fill,
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.width * 0.6,

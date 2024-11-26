@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:demoparty_assistant/constants/Theme.dart';
 
 class EventCard extends StatefulWidget {
   final String time;
@@ -37,7 +36,7 @@ class _EventCardState extends State<EventCard> with AutomaticKeepAliveClientMixi
         color: theme.colorScheme.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
-          color: theme.colorScheme.onSurface.withOpacity(0.1),
+          color: theme.colorScheme.onSurface.withOpacity(0.2),
         ),
       ),
       padding: const EdgeInsets.all(16.0),

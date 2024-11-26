@@ -7,6 +7,7 @@ import 'package:demoparty_assistant/data/services/notification_service.dart';
 import 'package:demoparty_assistant/data/services/cache_service.dart';
 import 'package:demoparty_assistant/data/services/news_content_service.dart';
 import 'package:demoparty_assistant/data/services/NativeCalendarService.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -22,15 +23,19 @@ class ServiceManager {
     print("[ServiceManager] Initializing Hive...");
     await HiveService.initialize();
 
+    // Rejestruj SettingsService przed CacheService
+    locator.registerLazySingleton(() => SettingsService());
+
     final cacheService = CacheService();
     await cacheService.initialize();
     locator.registerSingleton<CacheService>(cacheService);
+
     locator.registerLazySingleton(() => NotificationService());
     locator.registerLazySingleton(() => NativeCalendarService());
     locator.registerLazySingleton(() => NewsContentRepository());
     locator.registerLazySingleton(() => NewsContentService(locator<NewsContentRepository>()));
-    locator.registerLazySingleton(() => NewsRepository(locator<CacheService>()));
-    locator.registerLazySingleton(() => SettingsService());
+    locator.registerLazySingleton(() => NewsRepository());
+    locator.registerLazySingleton(() => const FlutterSecureStorage());
 
     locator.registerLazySingleton<TimeTableRepository>(() {
       return TimeTableRepository(
@@ -44,3 +49,4 @@ class ServiceManager {
     print("[ServiceManager] All services and repositories initialized.");
   }
 }
+

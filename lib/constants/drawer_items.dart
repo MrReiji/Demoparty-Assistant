@@ -1,15 +1,15 @@
-import 'package:demoparty_assistant/constants/Theme.dart';
+import 'package:demoparty_assistant/constants/theme/Theme.dart';
 import 'package:demoparty_assistant/utils/navigation/app_router_paths.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:demoparty_assistant/constants/app_styles.dart'; // Import global styles
+import 'package:demoparty_assistant/constants/theme/app_styles.dart'; // Import global styles
 
 final List<Map<String, dynamic>> drawerItems = [
   {
     'icon': FontAwesomeIcons.userLock,
-    'title': 'Authentication',
-    'page': 'Authentication',
-    'route': AppRouterPaths.authentication,
-    'iconColor': authenticationColor, // Ustal kolor dla Authentication w theme.dart
+    'title': 'Authorization',
+    'page': 'authorization',
+    'route': AppRouterPaths.authorization,
+    'iconColor': authorizationColor, // Ustal kolor dla Authorization w theme.dart
   },
   {
   'icon': FontAwesomeIcons.cog,
@@ -249,9 +249,16 @@ final List<Map<String, dynamic>> drawerItems = [
   },
   {
     'icon': FontAwesomeIcons.voteYea,
-    'title': 'Voting',
-    'page': 'Voting',
-    'route': AppRouterPaths.voting,
-    'iconColor': votingColor, // Ustal kolor dla Voting w theme.dart
+    'title': 'Voting Results',
+    'page': 'voting results',
+    'route': AppRouterPaths.voting_results,
+    'iconColor': votingColor,
   },
+{
+  'icon': FontAwesomeIcons.voteYea,
+  'title': 'Voting',
+  'page': 'voting',
+  'route': AppRouterPaths.voting,
+  'iconColor': votingColor,
+},
 ];

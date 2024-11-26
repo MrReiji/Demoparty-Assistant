@@ -1,6 +1,9 @@
 import 'package:demoparty_assistant/data/services/streams_service.dart';
 import 'package:demoparty_assistant/screens/video_player_screen.dart';
 import 'package:demoparty_assistant/utils/widgets/universal/universal_video_player.dart';
+import 'package:demoparty_assistant/utils/widgets/universal/errors/error_display_widget.dart';
+import 'package:demoparty_assistant/utils/widgets/universal/errors/error_helper.dart';
+import 'package:demoparty_assistant/utils/widgets/universal/loading/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:demoparty_assistant/utils/widgets/drawer/drawer.dart';
 
@@ -15,6 +18,7 @@ class _StreamsState extends State<Streams> {
   List<Map<String, String>> filteredStreams = [];
   Map<String, String>? liveStream;
   bool isLoading = true;
+  String? errorMessage;
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -25,18 +29,22 @@ class _StreamsState extends State<Streams> {
   }
 
   /// Fetches both live and archived streams and updates the UI.
-  Future<void> fetchStreams() async {
-    setState(() => isLoading = true);
+  Future<void> fetchStreams({bool forceRefresh = false}) async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
 
     try {
       liveStream = await StreamsService.fetchLiveStream();
       streams = await StreamsService.fetchArchiveStreams();
       filteredStreams = List.from(streams); // Initialize with all streams
     } catch (e) {
-      print('Error fetching streams: $e');
+      ErrorHelper.handleError(e);
+      setState(() => errorMessage = ErrorHelper.getErrorMessage(e));
+    } finally {
+      setState(() => isLoading = false);
     }
-
-    setState(() => isLoading = false);
   }
 
   /// Filters streams based on the search query.
@@ -55,25 +63,27 @@ class _StreamsState extends State<Streams> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Streams'),
-      ),
-      drawer: AppDrawer(currentPage: 'Streams'),
-      body: isLoading ? _buildLoadingIndicator(theme) : _buildContent(theme),
-    );
-  }
-
-  Widget _buildLoadingIndicator(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: theme.colorScheme.primary),
-          const SizedBox(height: 20),
-          Text(
-            'Loading streams...',
-            style: theme.textTheme.bodyLarge,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => fetchStreams(forceRefresh: true),
+            tooltip: "Refresh Streams",
           ),
         ],
       ),
+      drawer: AppDrawer(currentPage: 'Streams'),
+      body: isLoading
+          ? const LoadingWidget(
+              title: "Loading Streams",
+              message: "Please wait while we fetch the latest streams.",
+            )
+          : errorMessage != null
+              ? ErrorDisplayWidget(
+                  title: "Error Loading Streams",
+                  message: errorMessage!,
+                  onRetry: () => fetchStreams(forceRefresh: true),
+                )
+              : _buildContent(theme),
     );
   }
 
@@ -86,7 +96,7 @@ class _StreamsState extends State<Streams> {
             controller: searchController,
             decoration: InputDecoration(
               labelText: 'Search streams',
-              prefixIcon: Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
