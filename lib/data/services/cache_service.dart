@@ -1,41 +1,46 @@
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:get_it/get_it.dart';
-import 'settings_service.dart';
+import '../manager/settings/settings_manager.dart';
 
-/// CacheService handles caching of general data and images using Hive.
+/// Manages caching of data and images using Hive.
 class CacheService {
   late Box<dynamic> _dataBox;
   late Box<dynamic> _imageBox;
-  int _defaultTTL = 3600; // Default Time-to-Live (TTL) in seconds.
-  final SettingsService _settingsService = GetIt.I<SettingsService>();
 
-  /// Initializes Hive boxes for data and images.
+  // Default Time-to-Live (TTL) in seconds.
+  int _defaultTTL = 3600;
+
+  // Access to settings manager for cache-related configurations.
+  final SettingsManager _settingsManager = GetIt.I<SettingsManager>();
+
+  /// Initializes Hive boxes for caching data and images.
   Future<void> initialize() async {
-    print("[CacheService] Initializing...");
+    debugPrint("[CacheService] Initializing cache boxes...");
     _dataBox = await Hive.openBox('global_cache');
     _imageBox = await Hive.openBox('images_cache');
-    print("[CacheService] Boxes initialized: global_cache and images_cache.");
+    debugPrint("[CacheService] Cache boxes initialized: global_cache and images_cache.");
   }
 
   /// Retrieves the current global TTL.
   int getCurrentTTL() => _defaultTTL;
 
-  /// Sets the global TTL for both data and image caches.
+  /// Sets the global TTL for all cache entries.
   Future<void> setGlobalTTL(int ttl) async {
     _defaultTTL = ttl;
     await _updateTTL(_dataBox, ttl);
     await _updateTTL(_imageBox, ttl);
-    print("[CacheService] Global TTL set to $ttl seconds.");
+    debugPrint("[CacheService] Global TTL set to $ttl seconds.");
   }
 
-  /// Updates the TTL for all items in a given cache box.
+  /// Updates the TTL for all entries in the specified cache box.
   Future<void> _updateTTL(Box<dynamic> box, int ttl) async {
     for (final key in box.keys) {
       final cachedItem = box.get(key);
-      if (cachedItem != null && cachedItem is Map) {
+      if (cachedItem is Map) {
         cachedItem['expiry'] = DateTime.now()
             .add(Duration(seconds: ttl))
             .toIso8601String();
@@ -44,29 +49,29 @@ class CacheService {
     }
   }
 
-  /// Clears all data and image caches.
+  /// Clears all data and image cache entries.
   Future<void> clearAllCache() async {
     await _dataBox.clear();
     await _imageBox.clear();
-    print("[CacheService] All caches cleared.");
+    debugPrint("[CacheService] All caches cleared.");
   }
 
-  /// Checks if cache is enabled based on user settings.
+  /// Checks if caching is enabled based on user settings.
   Future<bool> isCacheEnabled() async {
-    return await _settingsService.isCacheEnabled();
+    return await _settingsManager.isCacheEnabled();
   }
 
-  /// Retrieves cached data or fetches fresh data if cache is disabled.
+  /// Retrieves cached data or fetches fresh data using the provided fetcher function.
   Future<dynamic> getDataOrFetch(String key, Future<dynamic> Function() fetcher) async {
     if (await isCacheEnabled()) {
       final cachedData = getData(key);
       if (cachedData != null) {
-        print("[CacheService] Using cached data for key: $key");
+        debugPrint("[CacheService] Returning cached data for key: $key");
         return cachedData;
       }
     }
 
-    print("[CacheService] Fetching fresh data for key: $key");
+    debugPrint("[CacheService] Fetching fresh data for key: $key");
     final data = await fetcher();
     if (await isCacheEnabled()) {
       await setData(key, data);
@@ -74,17 +79,17 @@ class CacheService {
     return data;
   }
 
-  /// Retrieves cached data for a given key.
+  /// Retrieves cached data for the specified key.
   dynamic getData(String key) {
     final cachedItem = _dataBox.get(key);
     if (cachedItem != null && !_isExpired(cachedItem['expiry'])) {
       return cachedItem['data'];
     }
-    _dataBox.delete(key); // Cleanup expired item.
+    _dataBox.delete(key); // Remove expired data.
     return null;
   }
 
-  /// Stores data in the cache with an optional TTL.
+  /// Stores data in the cache with an optional custom TTL.
   Future<void> setData(String key, dynamic value, [int? ttl]) async {
     final expiry = DateTime.now()
         .add(Duration(seconds: ttl ?? _defaultTTL))
@@ -92,37 +97,30 @@ class CacheService {
     await _dataBox.put(key, {'data': value, 'expiry': expiry});
   }
 
-  /// Retrieves a cached image for a given key.
+  /// Retrieves a cached image for the specified key.
   Uint8List? getImage(String key) {
     final cachedItem = _imageBox.get(key);
     if (cachedItem != null && !_isExpired(cachedItem['expiry'])) {
       return cachedItem['data'];
     }
-    _imageBox.delete(key); // Cleanup expired item.
+    _imageBox.delete(key); // Remove expired image.
     return null;
   }
 
-  /// Fetches an image, either from cache or network.
+  /// Fetches an image, either from the cache or the network.
   Future<Uint8List?> fetchImage(String url, [int? ttl]) async {
     final cachedImage = getImage(url);
     if (cachedImage != null) {
       return cachedImage;
-    } else {
-      return await cacheImage(url, ttl);
     }
+    return await cacheImage(url, ttl);
   }
 
-  /// Caches an image from a URL and returns the cached image.
+  /// Caches an image fetched from the provided URL.
   Future<Uint8List?> cacheImage(String url, [int? ttl]) async {
     if (!_shouldCacheImage(url)) {
-      print("[CacheService] Skipping caching for irrelevant image: $url");
+      debugPrint("[CacheService] Skipping caching for irrelevant image: $url");
       return null;
-    }
-
-    final cachedImage = getImage(url);
-    if (cachedImage != null) {
-      print("[CacheService] Using cached image for key: $url");
-      return cachedImage;
     }
 
     try {
@@ -134,26 +132,21 @@ class CacheService {
             .add(Duration(seconds: ttl ?? _defaultTTL))
             .toIso8601String();
         await _imageBox.put(url, {'data': compressedData, 'expiry': expiry});
-        print("[CacheService] Image cached successfully for key: $url");
+        debugPrint("[CacheService] Image cached successfully for URL: $url");
         return compressedData;
       } else {
-        print("[CacheService] Failed to fetch image. HTTP status: ${response.statusCode}");
+        debugPrint("[CacheService] Failed to fetch image. HTTP status: ${response.statusCode}");
       }
     } catch (e) {
-      print("[CacheService] Error fetching image: $e");
+      debugPrint("[CacheService] Error fetching image: $e");
     }
     return null;
   }
 
-  /// Determines if an image should be cached based on its URL or attributes.
+  /// Determines whether an image should be cached based on its URL.
   bool _shouldCacheImage(String url) {
     final excludedPatterns = ['/plugins/'];
-    for (final pattern in excludedPatterns) {
-      if (url.toLowerCase().contains(pattern)) {
-        return false;
-      }
-    }
-    return true;
+    return !excludedPatterns.any((pattern) => url.toLowerCase().contains(pattern));
   }
 
   /// Compresses an image to reduce storage size while maintaining quality.
@@ -162,7 +155,7 @@ class CacheService {
     if (image != null) {
       return Uint8List.fromList(img.encodeJpg(image, quality: 80));
     }
-    print("[CacheService] Failed to compress image.");
+    debugPrint("[CacheService] Failed to compress image.");
     return imageData;
   }
 
@@ -175,11 +168,11 @@ class CacheService {
   Future<void> removeKey(String key) async {
     if (_dataBox.containsKey(key)) {
       await _dataBox.delete(key);
-      print("[CacheService] Key removed from data cache: $key");
+      debugPrint("[CacheService] Key removed from data cache: $key");
     }
     if (_imageBox.containsKey(key)) {
       await _imageBox.delete(key);
-      print("[CacheService] Key removed from image cache: $key");
+      debugPrint("[CacheService] Key removed from image cache: $key");
     }
   }
 }

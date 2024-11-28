@@ -1,18 +1,17 @@
-import 'package:demoparty_assistant/screens/contact.dart';
-import 'package:demoparty_assistant/screens/content.dart';
-import 'package:demoparty_assistant/screens/settings.dart';
-import 'package:demoparty_assistant/screens/streams.dart';
-import 'package:demoparty_assistant/screens/users.dart';
-import 'package:demoparty_assistant/screens/voting.dart';
-import 'package:demoparty_assistant/screens/voting_results.dart';
+import 'package:demoparty_assistant/views/screens/contact_screen.dart';
+import 'package:demoparty_assistant/views/screens/generic_content_screen.dart';
+import 'package:demoparty_assistant/views/screens/news_screen.dart';
+import 'package:demoparty_assistant/views/screens/settings_screen.dart';
+import 'package:demoparty_assistant/views/screens/streams_screen.dart';
+import 'package:demoparty_assistant/views/screens/users_screen.dart';
+import 'package:demoparty_assistant/views/screens/voting_screen.dart';
+import 'package:demoparty_assistant/views/screens/voting_results_screen.dart';
 import 'package:demoparty_assistant/utils/navigation/auth_path_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:demoparty_assistant/screens/onboarding.dart';
-import 'package:demoparty_assistant/screens/time_table.dart';
-import 'package:demoparty_assistant/screens/authorization.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:demoparty_assistant/screens/news.dart';
+import 'package:demoparty_assistant/views/screens/onboarding_screen.dart';
+import 'package:demoparty_assistant/views/screens/time_table_screen.dart';
+import 'package:demoparty_assistant/views/screens/authorization_screen.dart';
 import 'app_router_paths.dart';
 
 class AppRouter {
@@ -24,7 +23,7 @@ class AppRouter {
         name: 'timeTable',
         path: AppRouterPaths.timeTable,
         builder: (BuildContext context, GoRouterState state) {
-          return TimeTable();
+          return TimeTableScreen();
         },
       ),
       GoRoute(
@@ -38,14 +37,14 @@ class AppRouter {
         name: 'news',
         path: AppRouterPaths.news,
         builder: (BuildContext context, GoRouterState state) {
-          return News();
+          return NewsScreen();
         },
       ),
       GoRoute(
         name: 'streams',
         path: AppRouterPaths.streams,
         builder: (BuildContext context, GoRouterState state) {
-          return Streams();
+          return StreamsScreen();
         },
       ),
       GoRoute(
@@ -85,7 +84,7 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) {
           final url = state.uri.queryParameters['url']!;
           final title = state.uri.queryParameters['title']!;
-          return ContentScreen(
+          return GenericContentScreen(
             url: url,
             title: title,
             currentPage: title,

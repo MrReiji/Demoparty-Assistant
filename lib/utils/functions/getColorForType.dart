@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:demoparty_assistant/constants/theme/Theme.dart';
+import 'package:demoparty_assistant/views/Theme.dart';
 
 Color getColorForType(String type) {
   switch (type.toLowerCase()) {

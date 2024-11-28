@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -7,6 +8,6 @@ class HiveService {
   static Future<void> initialize() async {
     final appDocDir = await getApplicationDocumentsDirectory();
     Hive.init(appDocDir.path);
-    print("[HiveService] Hive initialized at ${appDocDir.path}");
+    debugPrint("[HiveService] Hive initialized at ${appDocDir.path}");
   }
 }
