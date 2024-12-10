@@ -2,7 +2,6 @@ import 'package:demoparty_assistant/data/manager/time_table/time_table_manager.d
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
 import 'package:get_it/get_it.dart';
 import '../manager/settings/settings_manager.dart';
 

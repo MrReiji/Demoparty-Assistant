@@ -125,7 +125,7 @@ class VotingResultsManager {
 
       // Parse voting entries from HTML.
       final entries = soup.findAll('div', class_: 'thumbnail image').map((entry) {
-        final rankText = entry.find('span', class_: 'label')?.text?.replaceAll('#', '') ?? '0';
+        final rankText = entry.find('span', class_: 'label')?.text.replaceAll('#', '') ?? '0';
         final rank = int.parse(rankText);
         final title = entry.find('b')?.text ?? 'Unknown';
         final author = entry.find('p')?.text ?? 'Unknown';

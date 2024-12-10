@@ -98,7 +98,7 @@ class VotingResultCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.person, color: theme.colorScheme.tertiaryContainer ?? Colors.blueGrey, size: 24),
+                      Icon(Icons.person, color: theme.colorScheme.tertiaryContainer, size: 24),
                       const SizedBox(width: 8.0),
                       Expanded(
                         child: Text(

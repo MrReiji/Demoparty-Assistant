@@ -1,4 +1,3 @@
-import 'package:demoparty_assistant/data/manager/voting/voting_manager.dart';
 import 'package:demoparty_assistant/models/category_model.dart';
 import 'package:demoparty_assistant/models/voting_entry_model.dart';
 import 'package:demoparty_assistant/views/widgets/universal/errors/error_display_widget.dart';

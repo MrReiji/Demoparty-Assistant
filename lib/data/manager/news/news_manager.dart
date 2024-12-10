@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:demoparty_assistant/models/news_model.dart';
 import 'package:demoparty_assistant/data/services/cache_service.dart';
@@ -72,7 +71,7 @@ class NewsManager {
         // Process each article and add it to the news list.
         for (var article in articles) {
           final String title =
-              article.find('h3', class_: 'title')?.text?.trim() ?? 'No title';
+              article.find('h3', class_: 'title')?.text.trim() ?? 'No title';
           final String articleUrl =
               article.find('a', class_: 'entire-meta-link')?.attributes['href'] ??
                   '';
