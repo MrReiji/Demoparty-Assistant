@@ -7,10 +7,17 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:demoparty_assistant/views/widgets/universal/errors/error_display_widget.dart';
 import 'package:demoparty_assistant/utils/errors/error_helper.dart';
 
-/// A universal video player that adapts based on the video source.
+/// A universal video player widget that supports both YouTube and generic video URLs.
+/// 
+/// It dynamically determines the video source and adapts the player accordingly:
+/// - YouTube: Uses `YoutubePlayer` for playback.
+/// - Other URLs: Uses `Chewie` with `VideoPlayerController`.
 class UniversalVideoPlayer extends StatefulWidget {
-  final String videoUrl; // The URL of the video
-  final bool isEmbedded; // Whether the player is embedded or fullscreen
+  /// The URL of the video to be played.
+  final String videoUrl;
+
+  /// Whether the player is embedded or fullscreen.
+  final bool isEmbedded;
 
   const UniversalVideoPlayer({
     required this.videoUrl,
@@ -23,26 +30,26 @@ class UniversalVideoPlayer extends StatefulWidget {
 }
 
 class _UniversalVideoPlayerState extends State<UniversalVideoPlayer> {
-  late VideoPlayerController _videoPlayerController;
-  ChewieController? _chewieController;
-  YoutubePlayerController? _youtubeController;
-  bool isYoutubeVideo = false;
-  String? errorMessage;
+  late VideoPlayerController _videoPlayerController; // Controller for non-YouTube videos.
+  ChewieController? _chewieController; // Controller for Chewie player.
+  YoutubePlayerController? _youtubeController; // Controller for YouTube player.
+  bool isYoutubeVideo = false; // Tracks if the video is a YouTube video.
+  String? errorMessage; // Stores error messages for display.
 
   @override
   void initState() {
     super.initState();
-    _initializePlayer();
+    _initializePlayer(); // Initialize the video player based on the URL.
   }
 
-  /// Initializes the video player based on the URL type.
+  /// Determines the video type (YouTube or generic) and initializes the appropriate player.
   Future<void> _initializePlayer() async {
     setState(() {
-      errorMessage = null;
+      errorMessage = null; // Reset error message on retry.
     });
 
     try {
-      final youtubeId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+      final youtubeId = YoutubePlayer.convertUrlToId(widget.videoUrl); // Extract YouTube video ID.
       if (youtubeId != null) {
         isYoutubeVideo = true;
         _initializeYoutubePlayer(youtubeId);
@@ -50,45 +57,28 @@ class _UniversalVideoPlayerState extends State<UniversalVideoPlayer> {
         await _initializeChewiePlayer();
       }
     } catch (e) {
+      // Handle errors using ErrorHelper.
       ErrorHelper.handleError(e);
       setState(() {
-        errorMessage = _mapErrorToMessage(e);
+        errorMessage = ErrorHelper.getErrorMessage(e);
       });
     }
   }
 
-  /// Maps errors to user-friendly messages.
-  String _mapErrorToMessage(Object error) {
-    if (error is SocketException) {
-      return """
-Unable to connect to the internet.
-Please check your network connection and try again.
-""";
-    } else if (error is PlatformException &&
-        error.message?.contains('ExoPlaybackException: Source error') == true) {
-      return """
-The video cannot be loaded because there is no internet connection.
-Please connect to the internet and try again.
-""";
-    } else {
-      return ErrorHelper.getErrorMessage(error);
-    }
-  }
-
-  /// Initializes the YouTube player with the extracted YouTube ID.
+  /// Initializes the YouTube player using the extracted video ID.
   void _initializeYoutubePlayer(String youtubeId) {
     try {
       _youtubeController = YoutubePlayerController(
         initialVideoId: youtubeId,
         flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          mute: false,
+          autoPlay: false, // Video does not auto-play by default.
+          mute: false, // Video audio is not muted.
         ),
       );
     } catch (e) {
       ErrorHelper.handleError(e);
       setState(() {
-        errorMessage = _mapErrorToMessage(e);
+        errorMessage = ErrorHelper.getErrorMessage(e);
       });
     }
   }
@@ -96,73 +86,75 @@ Please connect to the internet and try again.
   /// Initializes the Chewie player for non-YouTube videos.
   Future<void> _initializeChewiePlayer() async {
     try {
-      _videoPlayerController = VideoPlayerController.network(widget.videoUrl);
-      await _videoPlayerController.initialize();
+      _videoPlayerController = VideoPlayerController.network(widget.videoUrl); // Load the video URL.
+      await _videoPlayerController.initialize(); // Wait for the video to initialize.
 
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
-        autoPlay: !widget.isEmbedded, // Autoplay if fullscreen
-        looping: false,
-        showControls: true,
+        autoPlay: !widget.isEmbedded, // Autoplay if the video is fullscreen.
+        looping: false, // Looping is disabled.
+        showControls: true, // Display playback controls.
       );
     } catch (e) {
       ErrorHelper.handleError(e);
       setState(() {
-        errorMessage = _mapErrorToMessage(e);
+        errorMessage = ErrorHelper.getErrorMessage(e);
       });
     }
   }
 
+  /// Builds the widget tree for the video player.
   @override
   Widget build(BuildContext context) {
     if (errorMessage != null) {
+      // Display error message with retry option.
       return ErrorDisplayWidget(
         title: 'Video Player Error',
         message: errorMessage!,
-        onRetry: _initializePlayer, // Retry initialization
+        onRetry: _initializePlayer, // Retry initialization.
       );
     }
 
     if (isYoutubeVideo) {
-      return _buildYoutubePlayer();
+      return _buildYoutubePlayer(); // Build YouTube player UI.
     } else {
-      return _buildChewiePlayer();
+      return _buildChewiePlayer(); // Build Chewie player UI.
     }
   }
 
   /// Builds the YouTube player widget.
   Widget _buildYoutubePlayer() {
     if (_youtubeController == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator()); // Show loading indicator.
     }
 
     return YoutubePlayer(
       controller: _youtubeController!,
-      showVideoProgressIndicator: true,
+      showVideoProgressIndicator: true, // Display progress indicator.
       progressIndicatorColor: Theme.of(context).colorScheme.secondary,
     );
   }
 
   /// Builds the Chewie player widget for non-YouTube videos.
   Widget _buildChewiePlayer() {
-    if (_chewieController == null ||
-        !_videoPlayerController.value.isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+    if (_chewieController == null || !_videoPlayerController.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator()); // Show loading indicator.
     }
 
     return AspectRatio(
-      aspectRatio: _videoPlayerController.value.aspectRatio,
+      aspectRatio: _videoPlayerController.value.aspectRatio, // Maintain video aspect ratio.
       child: Chewie(controller: _chewieController!),
     );
   }
 
+  /// Releases resources when the widget is disposed.
   @override
   void dispose() {
     if (!isYoutubeVideo) {
-      _videoPlayerController.dispose();
-      _chewieController?.dispose();
+      _videoPlayerController.dispose(); // Dispose video player controller.
+      _chewieController?.dispose(); // Dispose Chewie controller.
     } else {
-      _youtubeController?.dispose();
+      _youtubeController?.dispose(); // Dispose YouTube player controller.
     }
     super.dispose();
   }

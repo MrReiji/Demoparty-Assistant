@@ -1,16 +1,15 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'dart:convert'; // For JSON operations.
+import 'package:flutter/services.dart'; // For loading assets.
 
-/// Generic function to load and parse JSON from assets.
-/// 
-/// - [path]: The path to the JSON file in the assets folder.
-/// 
-/// Returns a dynamic object (either a `List` or `Map`).
+/// Loads a JSON file from assets and returns it as a Dart object.
 Future<dynamic> loadJson(String path) async {
   try {
-    final String response = await rootBundle.loadString(path);
-    return json.decode(response);
+    final String response = await rootBundle.loadString(path); // Load the file as a string.
+    return json.decode(response); // Parse and return the JSON as a Map or List.
   } catch (e) {
-    throw Exception("Error loading JSON from $path: $e");
+    throw Exception("Error loading JSON from $path: $e"); // Handle errors.
   }
 }
+
+
+

@@ -6,6 +6,11 @@ import 'package:demoparty_assistant/views/widgets/drawer/drawer.dart';
 import 'package:get_it/get_it.dart';
 
 /// Displays the current competition status and voting entries.
+///
+/// This screen allows users to:
+/// - View the status of live voting competitions.
+/// - Check the list of available voting entries.
+/// - Access an external voting tool for more actions.
 class VotingScreen extends StatefulWidget {
   const VotingScreen({Key? key}) : super(key: key);
 
@@ -14,8 +19,7 @@ class VotingScreen extends StatefulWidget {
 }
 
 class _VotingScreenState extends State<VotingScreen> {
-  final VotingManager _manager = GetIt.instance<VotingManager>();
-
+  final VotingManager _votingManager = GetIt.instance<VotingManager>();
   String competitionStatus = "Unknown";
   List<Map<String, dynamic>> votingEntries = [];
   bool isLoading = true;
@@ -24,28 +28,29 @@ class _VotingScreenState extends State<VotingScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchVotingData();
+    _fetchLiveVotingEntries();
   }
 
-  /// Fetches voting data and updates the screen state.
-  Future<void> _fetchVotingData() async {
+  /// Fetches live voting entries and updates the state.
+  Future<void> _fetchLiveVotingEntries() async {
     setState(() {
       isLoading = true;
       errorMessage = null;
     });
 
     try {
-      final data = await _manager.fetchVotingData();
+      final votingData = await _votingManager.fetchLiveVotingEntries();
       setState(() {
-        competitionStatus = data["competition"] ?? "No live voting at the moment!";
-        votingEntries = data["entries"];
+        competitionStatus = votingData["competition"] ?? "No live voting at the moment!";
+        votingEntries = votingData["entries"] ?? [];
       });
     } catch (e) {
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = "Failed to load voting details. Please try again.";
         competitionStatus = "Unknown";
         votingEntries = [];
       });
+      debugPrint("Error fetching voting details: $e");
     } finally {
       setState(() => isLoading = false);
     }
@@ -61,7 +66,7 @@ class _VotingScreenState extends State<VotingScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _fetchVotingData,
+            onPressed: _fetchLiveVotingEntries,
             tooltip: "Refresh Data",
           ),
         ],
@@ -69,20 +74,20 @@ class _VotingScreenState extends State<VotingScreen> {
       drawer: const AppDrawer(currentPage: "Voting"),
       body: isLoading
           ? const LoadingWidget(
-              title: "Loading Voting Data",
-              message: "Please wait while we fetch the latest voting data.",
+              title: "Loading Voting Details",
+              message: "Please wait while we fetch the latest voting details.",
             )
           : errorMessage != null
               ? ErrorDisplayWidget(
                   title: "Error Fetching Data",
                   message: errorMessage!,
-                  onRetry: _fetchVotingData,
+                  onRetry: _fetchLiveVotingEntries,
                 )
               : _buildContent(theme),
     );
   }
 
-  /// Builds the main content of the screen when no errors occur.
+  /// Builds the main content of the screen.
   Widget _buildContent(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -99,7 +104,7 @@ class _VotingScreenState extends State<VotingScreen> {
     );
   }
 
-  /// Builds the voting status display section.
+  /// Displays the current voting status.
   Widget _buildStatusSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +142,18 @@ class _VotingScreenState extends State<VotingScreen> {
   Widget _buildVotingToolButton(ThemeData theme) {
     return Center(
       child: ElevatedButton.icon(
-        onPressed: _manager.openVotingTool,
+        onPressed: () {
+          try {
+            _votingManager.launchVotingWebPage();
+          } catch (e) {
+            debugPrint("Error opening voting tool: $e");
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Failed to open voting tool. Please try again."),
+              ),
+            );
+          }
+        },
         icon: const Icon(Icons.open_in_browser),
         label: const Text("Go to Voting Tool"),
         style: ElevatedButton.styleFrom(
@@ -171,11 +187,11 @@ class _VotingScreenState extends State<VotingScreen> {
           child: ListTile(
             contentPadding: const EdgeInsets.all(16.0),
             title: Text(
-              entry["title"]!,
+              entry["title"] ?? "Untitled Entry",
               style: theme.textTheme.headlineSmall?.copyWith(fontSize: 18),
             ),
             subtitle: Text(
-              "Position: ${entry["position"]!}",
+              "Position: ${entry["position"] ?? "Unknown"}",
               style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
             ),
           ),

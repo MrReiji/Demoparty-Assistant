@@ -1,22 +1,29 @@
+import 'dart:io';
+
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:demoparty_assistant/utils/errors/error_helper.dart';
 
-/// A manager responsible for handling live and archived streams.
-/// Provides methods to fetch live stream metadata and archived stream details.
+/// Manages live and archived streams by fetching and parsing metadata.
 class StreamsManager {
-  /// Fetches live stream metadata from the specified URL.
+  // Base URLs for live and archive streams.
+  static const String liveStreamUrl = 'https://scenesat.com/video/1';
+  static const String archiveStreamsUrl = 'https://scenesat.com/videoarchive';
+
+  /// Fetches metadata for the live stream.
   ///
-  /// Returns a map containing:
-  /// - `title`: The title of the live stream.
-  /// - `description`: A description of the live stream.
-  /// - `url`: The URL of the live stream video.
+  /// Returns:
+  /// - A map containing:
+  ///   - `title`: Title of the live stream.
+  ///   - `description`: Description of the live stream.
+  ///   - `url`: Video URL of the live stream.
   ///
-  /// Returns `null` if the required data is not available or an error occurs.
+  /// Throws:
+  /// - An exception with a user-friendly message if the fetch fails or metadata is missing.
   Future<Map<String, String>?> fetchLiveStream() async {
     try {
-      final response = await http.get(Uri.parse('https://scenesat.com/video/1'));
+      final response = await http.get(Uri.parse(liveStreamUrl));
 
       if (response.statusCode == 200) {
         final BeautifulSoup soup = BeautifulSoup(response.body);
@@ -28,7 +35,7 @@ class StreamsManager {
         final videoUrl = videoElement?.attributes['src'];
 
         if (title != null && description != null && videoUrl != null) {
-          // Handle `blob:` prefix in video URLs if present.
+          // Remove the `blob:` prefix if present in the video URL.
           final resolvedUrl = videoUrl.startsWith('blob:') ? videoUrl.substring(5) : videoUrl;
 
           return {
@@ -38,35 +45,42 @@ class StreamsManager {
           };
         }
       } else {
-        debugPrint('[StreamsManager] Failed to fetch live stream: HTTP ${response.statusCode}');
+        // Handle non-200 HTTP status codes.
+        final errorMessage =
+            '[StreamsManager] Failed to fetch live stream: HTTP ${response.statusCode}';
+        debugPrint(errorMessage);
+        throw HttpException(ErrorHelper.getErrorMessage(HttpException(errorMessage)));
       }
     } catch (e) {
+      // Handle other exceptions using ErrorHelper.
       debugPrint('[StreamsManager] Error fetching live stream: $e');
       throw Exception(ErrorHelper.getErrorMessage(e));
     }
-    return null;
+    return null; // Return `null` if the required metadata is not found.
   }
 
-  /// Fetches archived stream metadata from the specified URL.
+  /// Fetches metadata for archived streams.
   ///
-  /// Returns a list of maps, each containing:
-  /// - `title`: The title of the archived stream.
-  /// - `date`: The date the stream was recorded.
-  /// - `duration`: The duration of the stream.
-  /// - `url`: The URL of the archived stream video.
+  /// Returns:
+  /// - A list of maps, each containing:
+  ///   - `title`: Title of the archived stream.
+  ///   - `date`: Date the stream was recorded.
+  ///   - `duration`: Duration of the stream.
+  ///   - `url`: Video URL of the archived stream.
   ///
-  /// Duplicates are filtered based on title and URL.
+  /// Throws:
+  /// - An exception with a user-friendly message if the fetch fails or no valid data is found.
   Future<List<Map<String, String>>> fetchArchiveStreams() async {
     List<Map<String, String>> streams = [];
     try {
-      final response = await http.get(Uri.parse('https://scenesat.com/videoarchive'));
+      final response = await http.get(Uri.parse(archiveStreamsUrl));
 
       if (response.statusCode == 200) {
         final BeautifulSoup soup = BeautifulSoup(response.body);
         final streamElements = soup.findAll('div', class_: 'row');
 
         for (var element in streamElements) {
-          // Extract individual stream metadata.
+          // Extract metadata for each stream entry.
           final titleElement = element.find('dd');
           final dateElement = element.find('dt');
           final urlElement = element.find('span', class_: 'playersrc')?.attributes['data-url'];
@@ -79,19 +93,26 @@ class StreamsManager {
               'url': urlElement,
             };
 
-            // Avoid duplicate entries based on title and URL.
-            if (!streams.any((s) => s['title']?.toLowerCase() == stream['title']?.toLowerCase() && s['url'] == stream['url'])) {
+            // Add the stream if no duplicate exists based on title and URL.
+            if (!streams.any((s) =>
+                s['title']?.toLowerCase() == stream['title']?.toLowerCase() &&
+                s['url'] == stream['url'])) {
               streams.add(stream);
             }
           }
         }
       } else {
-        debugPrint('[StreamsManager] Failed to fetch archive streams: HTTP ${response.statusCode}');
+        // Handle non-200 HTTP status codes.
+        final errorMessage =
+            '[StreamsManager] Failed to fetch archive streams: HTTP ${response.statusCode}';
+        debugPrint(errorMessage);
+        throw HttpException(ErrorHelper.getErrorMessage(HttpException(errorMessage)));
       }
     } catch (e) {
+      // Handle other exceptions using ErrorHelper.
       debugPrint('[StreamsManager] Error fetching archive streams: $e');
       throw Exception(ErrorHelper.getErrorMessage(e));
     }
-    return streams;
+    return streams; // Return the list of archived streams.
   }
 }

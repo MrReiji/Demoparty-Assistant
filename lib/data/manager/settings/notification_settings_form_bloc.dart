@@ -53,8 +53,9 @@ class NotificationSettingsFormBloc extends FormBloc<String, String> {
   Future<void> onSubmitting() async {
     debugPrint("[NotificationSettingsFormBloc] Submitting form data.");
     try {
-      // Parse and validate the reminder value.
+      // After validation by the form field, convert the reminder value from String to int.
       final value = int.parse(reminderValue.value);
+      
       final unit = timeUnit.value;
 
       // Save the new settings.

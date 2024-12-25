@@ -5,20 +5,21 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
 /// Bloc responsible for handling user authorization through login and registration.
+/// Supports secure storage of session data and dynamic switching between login and registration modes.
 class AuthorizationFormBloc extends FormBloc<String, String> {
-  // TextFieldBloc instances for login form fields
+  // Login form fields
   final login = TextFieldBloc(validators: [FieldBlocValidators.required]);
   final loginPassword = TextFieldBloc(validators: [
     FieldBlocValidators.required,
     FieldBlocValidators.passwordMin6Chars,
   ]);
 
-  // TextFieldBloc instances for registration form fields
+  // Registration form fields
   final registerHandle = TextFieldBloc(validators: [FieldBlocValidators.required]);
   final registerGroup = TextFieldBloc(validators: [FieldBlocValidators.required]);
   final registerAccessKey = TextFieldBloc(validators: [FieldBlocValidators.required]);
   final registerCountry = SelectFieldBloc<String, dynamic>(
-    items: ['Germany', 'USA', 'France', 'Japan', 'Other'],
+    items: ['Germany', 'USA', 'France', 'Japan', 'Other'], // Predefined dropdown options.
     validators: [FieldBlocValidators.required],
   );
   final registerPassword = TextFieldBloc(validators: [
@@ -30,33 +31,33 @@ class AuthorizationFormBloc extends FormBloc<String, String> {
     FieldBlocValidators.passwordMin6Chars,
   ]);
 
-  // Dependency injection for secure storage
+  // Secure storage instance for managing session data
   final _storage = GetIt.I<FlutterSecureStorage>();
 
-  // State variables for tracking login/registration status
-  bool isLogin = true;
-  bool isLoggedIn = false;
-  String? sessionCookie;
-  DateTime? cookieExpiry;
+  // State variables
+  bool isLogin = true; // Tracks whether the current mode is login.
+  bool isLoggedIn = false; // Indicates if the user is logged in.
+  String? sessionCookie; // Stores the session cookie.
+  DateTime? cookieExpiry; // Stores the expiry date of the session.
 
-  /// Constructor to initialize the form bloc and default fields.
+  /// Constructor initializes the form with login fields by default.
   AuthorizationFormBloc() {
     _addLoginFields();
   }
 
-  /// Switches to registration mode and resets the form.
+  /// Switches to registration mode and clears the form fields.
   void switchToRegistration() {
     debugPrint("Switching to registration mode.");
     isLogin = false;
-    clear(); // Clears all form fields.
+    clear(); // Clears all fields in the form.
     _addRegistrationFields();
   }
 
-  /// Switches to login mode and resets the form.
+  /// Switches to login mode and clears the form fields.
   void switchToLogin() {
     debugPrint("Switching to login mode.");
     isLogin = true;
-    clear(); // Clears all form fields.
+    clear(); // Clears all fields in the form.
     _addLoginFields();
   }
 
@@ -79,74 +80,83 @@ class AuthorizationFormBloc extends FormBloc<String, String> {
     ]);
   }
 
-  /// Logs the user out by clearing stored credentials and resetting the form.
+  /// Logs the user out by clearing session data from secure storage and resetting the form.
   Future<void> logout() async {
     debugPrint("Logging out the user.");
     isLoggedIn = false;
     sessionCookie = null;
     cookieExpiry = null;
 
-    // Clear session data from secure storage
+    // Clear session data securely
     await _storage.delete(key: 'session_cookie');
     await _storage.delete(key: 'cookie_expiry');
+    await _storage.delete(key: 'user_name');
 
-    clear();
-    switchToLogin();
+    clear(); // Clears all form fields.
+    switchToLogin(); // Resets to login mode.
     emitSuccess(successResponse: "Logged out successfully!");
   }
 
-  /// Handles form submission for either login or registration based on the mode.
+  /// Handles form submission logic for both login and registration modes.
+  /// Login: Sends credentials to the server and manages session cookies.
+  /// Registration: Placeholder logic for future implementation.
   @override
   Future<void> onSubmitting() async {
     debugPrint("Form submission started. isLogin: $isLogin");
 
+    // Variables for login submission
+    final String loginUrl = "https://party.xenium.rocks/visitors"; // Server URL for login.
+    final Map<String, String> loginHeaders = {"Content-Type": "application/x-www-form-urlencoded"};
+    final Map<String, String> loginBody = {
+      "visitor_login[login]": login.value,
+      "visitor_login[password]": loginPassword.value,
+      "login": "Log in",
+    };
+
     try {
       if (isLogin) {
-        // Login logic
-        final url = Uri.parse("https://party.xenium.rocks/visitors");
-        final headers = {"Content-Type": "application/x-www-form-urlencoded"};
-        final body = {
-          "visitor_login[login]": login.value,
-          "visitor_login[password]": loginPassword.value,
-          "login": "Log in"
-        };
 
-        final response = await http.post(url, headers: headers, body: body);
+        // Send login request
+        final response = await http.post(Uri.parse(loginUrl), headers: loginHeaders, body: loginBody);
 
         if (response.statusCode == 302) {
-          // Parse cookies from response
+          debugPrint("Login successful. Processing session cookies.");
+
+          // Extract session cookies
           final cookies = response.headers['set-cookie']?.split(RegExp(r',(?=\s*\w+=)')) ?? [];
           sessionCookie = cookies
               .where((cookie) => cookie.contains('session') || cookie.contains('autologin_user_auth_visitor'))
               .map((cookie) => cookie.split(';').first.trim())
               .join('; ');
 
-          // Extract expiry date from cookies or set a default expiry
+          // Extract or set a default expiry date
           final expiryMatch = RegExp(r'Expires=(.*?);').firstMatch(response.headers['set-cookie'] ?? '');
-          if (expiryMatch != null) {
-            cookieExpiry = DateTime.parse(expiryMatch.group(1)!);
-          } else {
-            // Default expiry to 3 days from now
-            cookieExpiry = DateTime.now().add(Duration(days: 3));
-          }
+          cookieExpiry = expiryMatch != null
+              ? DateTime.parse(expiryMatch.group(1)!)
+              : DateTime.now().add(Duration(hours: 1)); // Default expiry in 1 hour
 
           isLoggedIn = true;
 
-          // Store session details securely
+          // Store session data securely
           await _storage.write(key: 'session_cookie', value: sessionCookie);
           await _storage.write(key: 'cookie_expiry', value: cookieExpiry!.toIso8601String());
           await _storage.write(key: 'user_name', value: login.value);
 
           emitSuccess(successResponse: "Logged in successfully!");
         } else {
+          debugPrint("Login failed. Response code: ${response.statusCode}");
           emitFailure(failureResponse: "Login failed. Check your credentials.");
         }
-      } else {
-        // Placeholder for registration logic
-        debugPrint("Attempting registration.");
+      } 
+      
+       {
+        // Placeholder logic for registration
+        debugPrint("Registration logic not implemented yet.");
         emitSuccess(successResponse: "Registered successfully!");
       }
     } catch (error) {
+      // Catch and handle any errors during submission
+      debugPrint("Error during submission: $error");
       emitFailure(failureResponse: "An error occurred: $error");
     }
   }
